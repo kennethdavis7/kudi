@@ -68,8 +68,6 @@
                         <div class="form-group col-md-6">
                             <label for="inputUnit">Unit</label>
                             <select id="unit" class="form-control">
-                                <option selected>Choose...</option>
-                                <option>...</option>
                             </select>
                         </div>
                     </div>
@@ -251,7 +249,10 @@
                                 <tr id=row-${variant.id}>
                                     <th scope="row" class="text-center align-middle">${j + 1}</th>
                                     <td class="text-center align-middle" id="buy-price-${variant.id}">${moneyFormatter.format(variant.buy_price)}</td>
-                                    <td class="text-center align-middle" id="current-qty-${variant.id}">${variant.current_qty}</td>
+                                    <td class="text-center align-middle">
+                                        <span id="current-qty-${variant.id}">${variant.current_qty}</span>
+                                        ${variant.unit.abbrevation}
+                                    </td>
                                     <td class="text-center align-middle" id="duration-kept-${variant.id}">${moment(variant.created_at).fromNow(true)}</td>
                                     <td class="d-flex justify-content-center align-middle">
                                         <button type="button" class="btn btn-secondary editVariants" data-ingredient-id="${variant.id}" data-bs-toggle="modal" data-bs-target="#editVariants" style="margin-right:1rem;"><i class="bi bi-pencil-square"></i></button>
@@ -292,6 +293,7 @@
                 url: `/ingredients/decrease/${ingredientId}`,
                 dataType: "json",
                 success: function(response) {
+                    console.log(response.name)
                     if (typeof response.message != 'undefined') {
                         $(`#row-${response.id}`).remove();
                     } else {
@@ -410,7 +412,7 @@
         })
 
         $(document).on('change', '#ingredient', function(e) {
-            e.preventDefault();
+            const id = e.target.value;
 
             const data = {
                 'type': $('#ingredient').val(),
@@ -418,9 +420,12 @@
 
             $.ajax({
                 type: "GET",
-                url: `ingredient/${id}/getUnit`,
+                url: `ingredients/${id}/getUnit`,
                 success: function(response) {
-                    console.log(response.units);
+                    $("#unit").html("");
+                    $.each(response.units, function(i, item) {
+                        $("#unit").append(`<option value="${item.id}">${item.name}</option>`);
+                    })
                 }
             })
         });
@@ -432,7 +437,7 @@
                 'ingredient': $('#ingredient').val(),
                 'price': $('#price').val(),
                 'qty': $('#qty').val(),
-
+                'unit_id': $('#unit').val(),
             }
 
             $.ajaxSetup({

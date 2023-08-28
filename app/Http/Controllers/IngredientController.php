@@ -30,7 +30,7 @@ class IngredientController extends Controller
     public function getUnit($id)
     {
         $unitCategoryId = IngredientTypes::find($id)->unit_category_id;
-        $units = Unit::where('unit_category_id', '=', $unitCategoryId);
+        $units = Unit::where('unit_category_id', '=', $unitCategoryId)->get();
 
         return response()->json([
             'units' => $units
@@ -39,8 +39,8 @@ class IngredientController extends Controller
 
     public function fetchData(Request $request, $search)
     {
-        $userAuth = auth()->user()->name;
-        $user = User::where('name', '=', $userAuth)->first();
+        $userAuth = auth()->user();
+        $user = User::where('name', '=', $userAuth->name)->first();
 
         if ($request->has('data')) {
             $ingredients = $user->ingredientTypes()->filter($request->data);
@@ -50,8 +50,9 @@ class IngredientController extends Controller
 
         $ingredients = $ingredients->with([
             'ingredientVariants' => function ($query) use ($userAuth) {
-                $query->where('current_qty', '>', 0)->where("user_id", auth()->user()->id);
-            }
+                $query->where('current_qty', '>', 0)->where("user_id", $userAuth->id);
+            },
+            'ingredientVariants.unit',
         ])->paginate(5);
 
         return response()->json([
@@ -78,6 +79,8 @@ class IngredientController extends Controller
     public function decrease(int $id)
     {
         $ingredient = IngredientVariants::find($id);
+        $ingredientUnitId = $ingredient->unit_id;
+        $ingredientUnit = Unit::find($ingredientUnitId)->get();
 
         if ($ingredient->current_qty > 1) {
             $ingredient->current_qty--;
@@ -85,12 +88,12 @@ class IngredientController extends Controller
         } else {
             return response()->json([
                 'message' => 'Ingredient has been deleted',
-                'id' => $ingredient->id
             ]);
         }
 
         return response()->json([
             "ingredient" => $ingredient,
+            'name' => $ingredientUnit
         ], 200);
     }
 
@@ -111,6 +114,7 @@ class IngredientController extends Controller
             "price" => "required|numeric|min:0",
             "qty" => "required|numeric|min:1",
             "ingredient" => "required|exists:ingredient_types,id",
+            "unit_id" => "required|unique:ingredient_variants",
         ]);
 
         if ($validator->fails()) {
@@ -123,6 +127,7 @@ class IngredientController extends Controller
         $data = $validator->validated();
 
         $ingredientTypeId = $data['ingredient'];
+        $unit = $data["unit_id"];
         $qty = $data['qty'];
         $price = $data['price'];
 
@@ -139,6 +144,7 @@ class IngredientController extends Controller
             'initial_qty' => $qty,
             'current_qty' => $qty,
             'buy_price' => $price,
+            'unit_id' => $unit,
         ]);
 
         return response()->json([

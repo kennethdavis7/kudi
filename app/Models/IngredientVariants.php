@@ -26,4 +26,9 @@ class IngredientVariants extends Model
     {
         return $this->hasMany(IngredientHistory::class);
     }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class);
+    }
 }

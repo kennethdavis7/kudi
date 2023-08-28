@@ -39,7 +39,7 @@ Route::get('/recipes/detail/{id}', [RecipeController::class, 'detail'])->middlew
 Route::get('/recipes/fetchData/{search}', [RecipeController::class, 'fetchData'])->middleware("auth");
 Route::get('/favorites/fetchData/{search}', [FavoriteController::class, 'fetchData'])->middleware("auth");
 Route::get('/addRecipe', [AddRecipeController::class, 'index'])->middleware("auth");
-Route::get('/ingredients/{id}/getUnit', [IngredientController::class, 'index'])->middleware("auth");
+Route::get('/ingredients/{id}/getUnit', [IngredientController::class, 'getUnit'])->middleware("auth");
 
 
 Route::resource('/ingredients', IngredientController::class)->middleware("auth");

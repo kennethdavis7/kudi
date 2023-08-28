@@ -18,7 +18,7 @@ class DashboardController extends Controller
         $thisYear = Carbon::now()->format('Y');
 
         $monthlyExpense = Month::select([
-            DB::raw('COALESCE(SUM(ingredient_variants.buy_price * ingredient_variants.initial_qty), 0) expense'),
+            DB::raw('COALESCE(SUM(ingredient_variants.buy_price), 0) expense'),
             'months.month',
         ])
             ->leftJoin('user_ingredients', function ($join) use ($userId) {
