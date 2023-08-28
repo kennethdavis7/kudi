@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Ingredient;
 use App\Models\IngredientTypes;
 use App\Models\IngredientVariants;
+use App\Models\User;
 use App\Models\Month;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -39,7 +40,7 @@ class DashboardController extends Controller
             $join->on('user_ingredients.ingredient_types_id', '=', 'ingredient_variants.ingredient_types_id');
         });
 
-        $ingredientCount = $variantQuery->clone()->where('ingredient_variants.user_id', "=", $userId)->sum('current_qty');
+        $ingredientCount = User::find($userId)->ingredientTypes()->count();
 
         if ($ingredientCount > 0) {
             $longestDurationKept = $variantQuery->clone()->where("current_qty", ">", 0)

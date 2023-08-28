@@ -79,8 +79,6 @@ class IngredientController extends Controller
     public function decrease(int $id)
     {
         $ingredient = IngredientVariants::find($id);
-        $ingredientUnitId = $ingredient->unit_id;
-        $ingredientUnit = Unit::find($ingredientUnitId)->get();
 
         if ($ingredient->current_qty > 1) {
             $ingredient->current_qty--;
@@ -93,7 +91,6 @@ class IngredientController extends Controller
 
         return response()->json([
             "ingredient" => $ingredient,
-            'name' => $ingredientUnit
         ], 200);
     }
 
@@ -114,7 +111,7 @@ class IngredientController extends Controller
             "price" => "required|numeric|min:0",
             "qty" => "required|numeric|min:1",
             "ingredient" => "required|exists:ingredient_types,id",
-            "unit_id" => "required|unique:ingredient_variants",
+            "unit_id" => "required",
         ]);
 
         if ($validator->fails()) {

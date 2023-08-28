@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AddRecipeController;
+use App\Http\Controllers\BudgetController;
 use GuzzleHttp\Middleware;
 use Illuminate\Support\Facades\Route;
 use \App\Http\Middleware\Authenticates;
@@ -40,6 +41,9 @@ Route::get('/recipes/fetchData/{search}', [RecipeController::class, 'fetchData']
 Route::get('/favorites/fetchData/{search}', [FavoriteController::class, 'fetchData'])->middleware("auth");
 Route::get('/addRecipe', [AddRecipeController::class, 'index'])->middleware("auth");
 Route::get('/ingredients/{id}/getUnit', [IngredientController::class, 'getUnit'])->middleware("auth");
+Route::get('/budget', [BudgetController::class, 'get'])->middleware('auth');
+Route::put('/budget', [BudgetController::class, 'store'])->middleware('auth');
+Route::get('/budget/percentage', [BudgetController::class, 'getPercentageBudget'])->middleware('auth');
 
 
 Route::resource('/ingredients', IngredientController::class)->middleware("auth");
