@@ -10,7 +10,7 @@
         </div>
         <div class="col-md-12 d-flex justify-content-between align-items-center">
             <h1 class="mb-3">Ingredients</h1>
-            <div class="bg-success text-light px-3 py-2"><span id="percentage-budget"></span>% of budget used up</div>
+            <div class="bg-budget text-light px-3 py-2"><span id="percentage-budget"></span>% of budget used up</div>
         </div>
         <hr class="mb-5">
         <div class="col-md-3 mb-0">
@@ -112,6 +112,37 @@
         </div>
     </div>
 
+    <!-- DecreaseIngredientModal -->
+    <div class="modal fade" id="decrease" tabindex="-1" aria-labelledby="exampleMmodalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form class="modal-content" id="decreaseVariants">
+                <input type="hidden" id="decrease-id" name="id">
+                <div class="modal-header">
+                    <div id="form_message"></div>
+                    <h1 id="entry-modal-title" class="modal-title fs-5 modal-title" id="exampleModalLabel">Decrease Quantity</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3 row">
+                        <div class="form-group col-md-6">
+                            <label for="qty">Qty</label>
+                            <input type="number" class="form-control" id="qty-decrease" name="qty">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="inputUnit">Unit</label>
+                            <select id="unit" class="form-control">
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" id="entry-button" class="btn btn-primary decrease" name="submit">Decrease</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
 
     <div class="d-flex justify-content-end mt-3" style="margin-right:1.5rem;">
@@ -140,6 +171,7 @@
                 success: function(response, _, xhr) {
                     if (xhr.status === 200) {
                         $("#percentage-budget").text(response.percentage);
+                        $(".bg-budget").addClass(response.color);
                     }
                 }
             });
@@ -273,7 +305,7 @@
                                     <td class="d-flex justify-content-center align-middle">
                                         <button type="button" class="btn btn-secondary editVariants" data-ingredient-id="${variant.id}" data-bs-toggle="modal" data-bs-target="#editVariants" style="margin-right:1rem;"><i class="bi bi-pencil-square"></i></button>
                                         <button type="button" data-ingredient-id="${variant.id}" class="btn btn-secondary deleteVariants" style="margin-right:1rem;"><i class="bi bi-trash"></i></button>
-                                        <button type="button" data-ingredient-id="${variant.id}" class="btn btn-secondary decrease"><i class="bi bi-arrow-down"></i></button>
+                                        <button type="button" data-ingredient-id="${variant.id}" class="btn btn-secondary decrease-button" data-bs-toggle="modal" data-bs-target="#decrease"><i class="bi bi-arrow-down"></i></button>
                                     </td>
                                 </tr>
                             `;
@@ -295,8 +327,19 @@
             })
         }
 
-        $(document).on("click", ".decrease", function() {
+        $(document).on('click', '.decrease-button', function(e) {
+            e.preventDefault();
+
             const ingredientId = $(this).data("ingredient-id");
+            $("#decrease-id").val(ingredientId);
+        })
+
+        $(document).on("submit", "#decrease form", function(e) {
+            e.preventDefault();
+            const ingredientId = $("#decrease-id").val();
+            const data = {
+                'decrease': $("#qty-decrease").val()
+            }
 
             $.ajaxSetup({
                 headers: {
@@ -308,13 +351,21 @@
                 type: "PUT",
                 url: `/ingredients/decrease/${ingredientId}`,
                 dataType: "json",
+                data: data,
                 success: function(response) {
-                    console.log(response.name)
-                    if (typeof response.message != 'undefined') {
-                        $(`#row-${response.id}`).remove();
+                    const {
+                        current_qty,
+                        id,
+                    } = response.ingredient;
+
+                    if (current_qty === 0) {
+                        $(`#row-${id}`).remove();
                     } else {
-                        $(`#current-qty-${response.ingredient.id}`).text(response.ingredient.current_qty);
+                        $(`#current-qty-${id}`).text(current_qty);
                     }
+
+                    $("#decrease").modal("hide");
+                    $(".modal").find("input").val("");
                 },
             })
         })

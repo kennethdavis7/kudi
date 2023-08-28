@@ -50,8 +50,16 @@ class BudgetController extends Controller
             ->sum('buy_price');
 
         $percentage = ($totalPrice / $budget) * 100;
+
+        if ($percentage > 100) {
+            return response()->json([
+                'percentage' => $percentage,
+                'color' => 'bg-danger'
+            ]);
+        }
         return response()->json([
-            'percentage' => $percentage
+            'percentage' => $percentage,
+            'color' => 'bg-success'
         ]);
     }
 

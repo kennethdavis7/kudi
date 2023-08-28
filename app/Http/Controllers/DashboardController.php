@@ -25,9 +25,10 @@ class DashboardController extends Controller
             ->leftJoin('user_ingredients', function ($join) use ($userId) {
                 $join->on('user_ingredients.user_id', '=', DB::raw("'$userId'"));
             })
-            ->leftJoin('ingredient_variants', function ($join) use ($thisYear) {
+            ->leftJoin('ingredient_variants', function ($join) use ($thisYear, $userId) {
                 $join->on('ingredient_variants.ingredient_types_id', '=', 'user_ingredients.ingredient_types_id');
                 $join->on('months.month', '=', DB::raw('MONTH(ingredient_variants.created_at)'));
+                $join->on('ingredient_variants.user_id', '=', DB::raw("'$userId'"));
                 $join->on(DB::raw('YEAR(ingredient_variants.created_at)'), '=', DB::raw("'$thisYear'"));
             })
 

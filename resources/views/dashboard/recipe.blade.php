@@ -8,7 +8,10 @@
         <div class="alert alert-success alert-dismissible fade show success_message" style="display:none;" role="alert">
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <h1>Recipes</h1>
+        <div class="col-md-12 d-flex justify-content-between align-items-center">
+            <h1 class="mb-3">Recipes</h1>
+            <div class="bg-budget text-light px-3 py-2"><span id="percentage-budget"></span>% of budget used up</div>
+        </div>
         <hr class="mb-5">
         <div class="col-md-3 mb-0">
             <div class="d-flex" role="search">
@@ -34,6 +37,21 @@
         let currentPage = 1;
         let totalPages = 1;
         fetchData();
+
+        getPercentageBudget();
+
+        function getPercentageBudget() {
+            $.ajax({
+                type: "GET",
+                url: "/budget/percentage",
+                success: function(response, _, xhr) {
+                    if (xhr.status === 200) {
+                        $("#percentage-budget").text(response.percentage);
+                        $(".bg-budget").addClass(response.color);
+                    }
+                }
+            });
+        }
 
         function goToPage(newPage) {
             if (newPage < 1) newPage = 1;

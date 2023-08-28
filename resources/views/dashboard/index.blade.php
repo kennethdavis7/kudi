@@ -7,7 +7,7 @@
     <div class="row mt-5 mx-3">
         <div class="col-md-12 d-flex justify-content-between align-items-center">
             <h1 class="mb-3">Dashboard</h1>
-            <div class="bg-success text-light px-3 py-2"><span id="percentage-budget"></span>% of budget used up</div>
+            <div class="text-light px-3 py-2 bg-budget"><span id="percentage-budget"></span>% of budget used up</div>
         </div>
         <hr class="mb-5">
         <div class="col-md-4">
@@ -142,6 +142,7 @@
                 success: function(response, _, xhr) {
                     if (xhr.status === 200) {
                         $("#percentage-budget").text(response.percentage);
+                        $(".bg-budget").addClass(response.color);
                     }
                 }
             });

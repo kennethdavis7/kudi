@@ -67,20 +67,37 @@ class RecipeController extends Controller
     public function detail($id)
     {
         $recipe = Recipe::find($id);
+        $userId = auth()->user()->id;
 
         $ingredients = RecipeIngredient::select(
             'ingredient_types.type',
             'recipe_ingredients.qty',
             'recipes.recipe_img',
-            DB::raw('GREATEST(0, (recipe_ingredients.qty - COALESCE(iv.total_current_qty, 0))) missing_quantity')
+            DB::raw('GREATEST(0, ((recipe_ingredients.qty * units.value) - COALESCE(iv.total_current_qty, 0))) missing_quantity')
         )
             ->leftJoin('recipes', 'recipes.id', '=', 'recipe_ingredients.recipe_id')
             ->leftJoin('user_ingredients', 'user_ingredients.ingredient_types_id', '=', 'recipe_ingredients.ingredient_types_id')
             ->leftJoin('ingredient_types', 'ingredient_types.id', '=', 'recipe_ingredients.ingredient_types_id')
-            ->leftJoin(DB::raw('(SELECT ingredient_types_id, SUM(current_qty) AS total_current_qty FROM ingredient_variants WHERE user_id =' . auth()->user()->id . ' GROUP BY ingredient_types_id) AS iv'), function ($join) {
-                $join->on('ingredient_types.id', '=', 'iv.ingredient_types_id');
-            })
-            ->groupBy('ingredient_types.type', 'recipe_ingredients.qty', 'recipes.recipe_img', 'iv.total_current_qty')
+            ->leftJoin(
+                DB::raw("(
+                SELECT
+                    ingredient_types_id,
+                    SUM(current_qty * units.value) AS total_current_qty
+                FROM
+                    ingredient_variants
+                LEFT JOIN
+                    units ON units.id = ingredient_variants.unit_id
+                WHERE
+                    user_id=$userId
+                GROUP BY
+                    ingredient_types_id
+                ) AS iv"),
+                function ($join) {
+                    $join->on('ingredient_types.id', '=', 'iv.ingredient_types_id');
+                }
+            )
+            ->leftJoin('units', 'units.id', '=', 'recipe_ingredients.unit_id')
+            ->groupBy('ingredient_types.type', 'recipe_ingredients.qty', 'recipes.recipe_img', 'units.value', 'iv.total_current_qty')
             ->where('recipes.id', '=', $id)
             ->get();
 

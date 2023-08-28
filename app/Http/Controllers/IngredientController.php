@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Unit;
 use App\Models\UserIngredients;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
@@ -48,10 +49,12 @@ class IngredientController extends Controller
             $ingredients = $user->ingredientTypes()->filter($search);
         }
 
-        $ingredients = $ingredients->with([
-            'ingredientVariants' => function ($query) use ($userAuth) {
-                $query->where('current_qty', '>', 0)->where("user_id", $userAuth->id);
-            },
+        $condition = function ($query) use ($userAuth) {
+            $query->where('current_qty', '>', 0)->where('user_id', $userAuth->id);
+        };
+
+        $ingredients = $ingredients->whereHas('ingredientVariants', $condition)->with([
+            'ingredientVariants' => $condition,
             'ingredientVariants.unit',
         ])->paginate(5);
 
@@ -76,18 +79,17 @@ class IngredientController extends Controller
         ]);
     }
 
-    public function decrease(int $id)
+    public function decrease(int $id, Request $request)
     {
         $ingredient = IngredientVariants::find($id);
+        $validator = Validator::make($request->all(), [
+            'decrease' => 'required'
+        ]);
 
-        if ($ingredient->current_qty > 1) {
-            $ingredient->current_qty--;
-            $ingredient->save();
-        } else {
-            return response()->json([
-                'message' => 'Ingredient has been deleted',
-            ]);
-        }
+        $qtyDecrease =  $validator->validated();
+
+        $ingredient->current_qty = max(0, $ingredient->current_qty - $qtyDecrease['decrease']);
+        $ingredient->save();
 
         return response()->json([
             "ingredient" => $ingredient,
