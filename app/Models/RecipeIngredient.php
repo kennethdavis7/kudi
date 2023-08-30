@@ -10,4 +10,9 @@ class RecipeIngredient extends Model
     use HasFactory;
 
     protected $fillable = ['recipe_id', 'ingredient_types_id', 'qty'];
+
+    public function ingredientVariants()
+    {
+        return $this->belongsToMany(ingredientVariants::class);
+    }
 }

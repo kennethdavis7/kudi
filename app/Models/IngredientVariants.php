@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class IngredientVariants extends Model
 {
     use HasFactory;
+
+    protected $table = 'ingredient_variants';
     protected $guarded = ["id"];
 
     public function scopeFilter($query, $search)

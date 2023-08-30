@@ -44,6 +44,7 @@ Route::get('/ingredients/{id}/getUnit', [IngredientController::class, 'getUnit']
 Route::get('/budget', [BudgetController::class, 'get'])->middleware('auth');
 Route::put('/budget', [BudgetController::class, 'store'])->middleware('auth');
 Route::get('/budget/percentage', [BudgetController::class, 'getPercentageBudget'])->middleware('auth');
+Route::put('/recipes/decrease-ingredients-by-recipe/{id}', [RecipeController::class, 'decreaseIngredientsByRecipe'])->middleware('auth');
 
 
 Route::resource('/ingredients', IngredientController::class)->middleware("auth");

@@ -3,6 +3,25 @@
 
 @section("body")
 @include("layout.sidebar")
+<style>
+    #recipes {
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+    }
+
+    @media (min-width: 768px) {
+        #recipes {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (min-width: 1024px) {
+        #recipes {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+</style>
+
 <div class="container">
     <div class="row mt-5 mb-0 mx-3">
         <div class="alert alert-success alert-dismissible fade show success_message" style="display:none;" role="alert">
@@ -10,17 +29,19 @@
         </div>
         <div class="col-md-12 d-flex justify-content-between align-items-center">
             <h1 class="mb-3">Recipes</h1>
-            <div class="bg-budget text-light px-3 py-2"><span id="percentage-budget"></span>% of budget used up</div>
+            <div class="rounded bg-budget text-light px-3 py-2"><span id="percentage-budget"></span>% of budget used up</div>
         </div>
         <hr class="mb-5">
-        <div class="col-md-3 mb-0">
+        <div class="col-md-4 mb-0">
             <div class="d-flex" role="search">
                 <input class="form-control me-2 search" type="search" placeholder="Search" aria-label="Search">
             </div>
         </div>
     </div>
 
-    <div id="recipes"></div>
+    <div class="row mt-5 mb-0 mx-3">
+        <div id="recipes" class="gap-4"></div>
+    </div>
 
     <div class="d-flex justify-content-end mt-5" style="margin-right:1.5rem;">
         <nav aria-label="...">
@@ -36,9 +57,13 @@
     $(document).ready(function() {
         let currentPage = 1;
         let totalPages = 1;
-        fetchData();
 
+        fetchData();
         getPercentageBudget();
+
+        function limit(string = '', limit = 0) {
+            return string.substring(0, limit) + "...";
+        }
 
         function getPercentageBudget() {
             $.ajax({
@@ -104,8 +129,6 @@
             });
         }
 
-        $(document).on("input", ".search", () => goToPage(1));
-
         function fetchData() {
             const rawSearchQuery = $('.search').val();
             const search = rawSearchQuery.trim().length === 0 ? 'all' : rawSearchQuery;
@@ -118,49 +141,43 @@
                     let html = '';
                     $("#recipes").html("");
                     $.each(response.recipes.data, function(i, recipe) {
-                        console.log("ms", recipe.missing_quantity)
-                        console.log("d", recipe.diff)
-                        console.log("pd", recipe.positive_diff)
-                        if (i % 3 === 0) {
-                            html += '<div class="row mt-5 mb-0 mx-3">';
-                        }
-
                         html += `
-                    <div class="col-md-4 py-2 py-md-0">
-                        <div class="card h-100 d-flex flex-column justify-content-between">
-                            <div>
-                                <img class="card-img-top" style="width: 100%; height: 15rem; object-fit: cover;" src="${recipe.recipe_img}" alt="Card image cap">
-                                <div class="card-body">
-                                    <div>
-                                        <div class="d-flex justify-content-between">
-                                            <h5 class="card-title">${recipe.recipe_name}</h5>
-                    `;
+                            <div class="card h-100 d-flex flex-column justify-content-between">
+                                <div>
+                                    <img class="card-img-top" style="width: 100%; height: 15rem; object-fit: cover;" src="${recipe.recipe_img}" alt="Card image cap">
+                                    <div class="card-body">
+                                        <div>
+                                            <div class="d-flex justify-content-between">
+                                                <h5 class="card-title mr-4">${recipe.recipe_name}</h5>
+                        `;
 
                         if (recipe.is_favourited > 0) {
                             html += `
-                        <img src="{{ asset('img/heart-red.png') }}" data-recipe-id="${recipe.id}" id="favorite-${recipe.id}" class="favorite-red" style="width: 1.5rem; height: 1.5rem;">
-                        `;
+                            <img src="{{ asset('img/heart-red.png') }}" data-recipe-id="${recipe.id}" id="favorite-${recipe.id}" class="favorite-red" style="width: 1.5rem; height: 1.5rem;">
+                            `;
                         } else {
                             html += `
-                        <img src="{{ asset('img/heart-black.png') }}" data-recipe-id="${recipe.id}" id="favorite-${recipe.id}"  class="favorite-black" style="width: 1.5rem; height: 1.5rem;">
-                        `;
+                            <img src="{{ asset('img/heart-black.png') }}" data-recipe-id="${recipe.id}" id="favorite-${recipe.id}"  class="favorite-black" style="width: 1.5rem; height: 1.5rem;">
+                            `;
                         }
 
                         html += `
                                     </div>
                     `;
 
-                        if (recipe.missing_quantity != 0) {
+                        console.log(recipe.recipe_name, recipe.missing_quantity);
+
+                        if (recipe.missing_quantity > 0) {
                             html += `
-                            <span class="text-danger">
-                                Kekurangan bahan
-                            </span>
-                        `;
+                                <span class="text-danger">
+                                    Kekurangan bahan
+                                </span>
+                            `;
                         }
 
                         html += `
                                         <p class="card-text mt-3">
-                                            ${recipe.description}
+                                            ${limit(recipe.description, 100)}
                                         </p>
                                     </div>
                                 </div>
@@ -171,12 +188,7 @@
                                 <span>View Recipe</span>
                             </a>
                         </div>
-                    </div>
-                    `;
-
-                        if (i % 3 === 2 || i === response.recipes.length - 1) {
-                            html += '</div>';
-                        }
+                        `;
                     });
 
                     $("#recipes").append(html);
@@ -185,6 +197,8 @@
 
             })
         }
+
+        $(document).on("input", ".search", () => goToPage(1));
 
         $(document).on("click", ".favorite-black", function() {
             const recipeId = {

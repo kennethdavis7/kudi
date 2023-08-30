@@ -4,7 +4,7 @@
 @section("body")
 @include("layout.sidebar")
 <div class="container overflow-hidden">
-    <div class="overflow-hidden mt-5 mx-3 gap-4" style="display: grid; grid-template-columns: 7fr 5fr; grid-template-rows: 1fr; max-height: 100%;">
+    <div class="overflow-hidden mt-5 mx-3 gap-2" style="display: grid; grid-template-columns: 7fr 5fr; grid-template-rows: 1fr; max-height: 100%;">
         <div class="px-2 overflow-scroll relative" style="padding-bottom: 4rem;">
             <div>
                 <h1>{{ $recipe->recipe_name }}</h1>
@@ -12,8 +12,9 @@
                 <img src="{{$recipe->recipe_img}}" style="width: 100%; height: 20rem; object-fit: cover;" class="w-100" alt="Fried Rice">
             </div>
 
-            <div class="box p-4" style="max-height: 100%;">
-                <h3>Description</h3>
+            <div style="max-height: 100%;">
+                <h3 class="mt-4">Description</h3>
+                <hr>
                 <p>{{$recipe->description}}</p>
                 <hr>
                 <h3>Ingredients</h3>
@@ -51,8 +52,8 @@
                 </ul>
             </div>
         </div>
-        <div>
-            <div class="box p-4 overflow-auto">
+        <div class="overflow-scroll relative mb-4" style="max-width:100%;">
+            <div class="p-4" style="max-height: 100%; padding-bottom: 4rem;">
                 <h3>Procedure</h3>
                 <hr>
                 <ol class="list-group">
@@ -93,8 +94,15 @@
                         </div>
                     </li>
                 </ol>
+                <div class="mb-5">
+                    <form action="/recipes/decrease-ingredients-by-recipe/{{ $recipe->id }}" method="POST">
+                        @csrf
+                        @method('PUT')
+
+                        <button type="submit" class="btn btn-secondary mb-5 mt-3 decreaseIngredientsByRecipe" style="width: 100%;">Gunakan bahan dalam penyimpanan</button>
+                    </form>
+                </div>
             </div>
-            <button type="button" class="btn btn-secondary mt-4" style="width: 100%;">Gunakan bahan dalam penyimpanan</button>
         </div>
     </div>
 </div>

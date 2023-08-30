@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\FavoriteRecipes;
+use App\Models\IngredientVariants;
 use App\Models\Recipe;
 use App\Models\RecipeIngredient;
+use App\Models\IngredientTypes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -25,37 +27,54 @@ class RecipeController extends Controller
     {
         $userId = auth()->user()->id;
 
-        $recipes = Recipe::select(
+        // dd(DB::select("
+        // SELECT
+        //             user_ingredients.id,
+        //             user_ingredients.ingredient_types_id,
+        //             ingredient_types.type
+        //         FROM
+        //             user_ingredients
+        //         LEFT JOIN
+        //             ingredient_variants ON ingredient_variants.ingredient_types_id = user_ingredients.ingredient_types_id
+        //         LEFT JOIN
+        //             ingredient_types ON ingredient_types.id = user_ingredients.ingredient_types_id
+        //         WHERE
+        //             user_ingredients.user_id = $userId
+        //         GROUP BY
+        //             user_ingredients.ingredient_types_id, user_ingredients.id, ingredient_types.type
+        //         HAVING
+        //             SUM(ingredient_variants.current_qty) > 0
+        //         "));
+
+        $recipes = RecipeIngredient::select(
             'recipes.id',
             'recipes.recipe_name',
             'recipes.description',
             'recipes.recipe_img',
-            DB::raw('COUNT(recipe_ingredients.id) - COUNT(user_ingredients.id) AS missing_ingredient_count'),
-            DB::raw('SUM(
-                GREATEST(0, ((recipe_ingredients.qty * units.value) - COALESCE(iv.total_current_qty, 0)))
-            ) AS missing_quantity'),
+            DB::raw('SUM(GREATEST(
+                0, (recipe_ingredients.qty * units.value) - COALESCE(iv.total_current_qty, 0))
+            ) missing_quantity'),
             DB::raw('IF(favorite_recipes.id IS NULL, 0, 1) AS is_favourited')
         )
-            ->leftJoin('recipe_ingredients', 'recipe_ingredients.recipe_id', '=', 'recipes.id')
-            ->leftJoin('user_ingredients', function ($join) use ($userId) {
-                $join->on('user_ingredients.ingredient_types_id', '=', 'recipe_ingredients.ingredient_types_id')
-                    ->where('user_ingredients.user_id', '=', $userId);
-            })
-            ->leftJoin(DB::raw("(
-                SELECT
-                    ingredient_types_id,
+            ->leftJoin('recipes', 'recipes.id', '=', 'recipe_ingredients.recipe_id')
+            ->leftJoin(
+                DB::raw("
+                (SELECT
+                    ingredient_variants.ingredient_types_id,
                     SUM(current_qty * units.value) AS total_current_qty
                 FROM
                     ingredient_variants
                 LEFT JOIN
                     units ON units.id = ingredient_variants.unit_id
-                WHERE 
-                    user_id = $userId
+                WHERE
+                    user_id=$userId
                 GROUP BY
-                    ingredient_types_id, units.value
-                ) AS iv"), function ($join) {
-                $join->on('recipe_ingredients.ingredient_types_id', '=', 'iv.ingredient_types_id');
-            })
+                    ingredient_types_id
+                ) AS iv"),
+                'iv.ingredient_types_id',
+                '=',
+                'recipe_ingredients.ingredient_types_id'
+            )
             ->leftJoin('units', 'units.id', '=', 'recipe_ingredients.unit_id')
             ->leftJoin('favorite_recipes', function ($join) use ($userId) {
                 $join->on('favorite_recipes.recipe_id', '=', 'recipes.id');
@@ -63,15 +82,13 @@ class RecipeController extends Controller
             })
             ->groupBy('recipes.id', 'recipes.recipe_name', 'recipes.description', 'recipe_img', 'favorite_recipes.id')
             ->orderBy('missing_quantity', 'asc')
-            ->orderBy('is_favourited', 'asc')
-            ->orderBy('missing_ingredient_count', 'asc')
             ->orderBy('recipes.recipe_name', 'asc');
 
         if ($search != "all") {
             $recipes = $recipes->where("recipe_name", "LIKE", "%" . $search . "%");
         }
 
-        $recipes = $recipes->paginate(6);
+        $recipes = $recipes->paginate(10);
 
         return response()->json([
             'title' => "Recipe",
@@ -127,6 +144,48 @@ class RecipeController extends Controller
             'active' => "recipe",
             'recipe' => $recipe,
             'ingredients' => $ingredients,
+        ]);
+    }
+
+    public function decreaseIngredientsByRecipe($id)
+    {
+        $userId = auth()->user()->id;
+
+        $recipeIngredients = RecipeIngredient::select('qty', 'ingredient_types_id', 'units.value')
+            ->where('recipe_id', $id)
+            ->leftJoin('units', 'units.id', '=', 'recipe_ingredients.unit_id')
+            ->get();
+
+        $variants = IngredientVariants::select('ingredient_variants.*', 'units.value')
+            ->where('user_id', $userId)
+            ->leftJoin('units', 'units.id', '=', 'ingredient_variants.unit_id')
+            ->orderBy('ingredient_types_id', 'desc')
+            ->get();
+
+        $recipeIngredients = $recipeIngredients->map(function ($value) {
+            $value->qty *= $value->value;
+            return $value;
+        });
+
+        foreach ($variants as $variant) {
+            $ingredient = $recipeIngredients->first(function ($value) use ($variant) {
+                return $value->ingredient_types_id === $variant->ingredient_types_id;
+            });
+
+            if ($ingredient === null) continue;
+
+            $oldQuantity = $variant->current_qty * $variant->value;
+            $newQuantity = max(0, $oldQuantity - $ingredient->qty);
+
+            $variant->current_qty = $newQuantity / $variant->value;
+            $ingredient->qty -= $oldQuantity - $newQuantity;
+
+            $variant->save();
+        }
+
+        return view('dashboard.recipe', [
+            'title' => "Recipe",
+            'active' => "recipe",
         ]);
     }
 
