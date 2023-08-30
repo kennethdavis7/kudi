@@ -217,6 +217,8 @@ class IngredientController extends Controller
 
     public function deleteVariant(IngredientVariants $ingredientVariant)
     {
+        $userId = auth()->user()->id;
+        UserIngredients::where("user_id", "=", $userId)->where("ingredient_types_id", "=", $ingredientVariant->ingredient_types_id)->delete();
         IngredientVariants::destroy($ingredientVariant->id);
         return response()->json([
             "message" => "Ingredient has been deleted"

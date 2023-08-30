@@ -40,7 +40,7 @@
         <h3 class="mt-5">Expense</h3>
 
         <div class="row">
-            <div class="col-md-9">
+            <div class="col-md-12" style="position: relative; min-height: 24rem;">
                 <canvas id="myChart"></canvas>
             </div>
         </div>
@@ -83,8 +83,6 @@
     const longestDurationKeptEl = $('#longest-duration-kept');
     const longestDurationKept = <?php echo $longestDurationKept ?>;
 
-    console.log(longestDurationKept);
-
     if (longestDurationKept !== -1) {
         longestDurationKeptEl.text(moment.duration(longestDurationKept, 's').humanize());
     } else {
@@ -94,7 +92,7 @@
     const ctx = $('#myChart');
     const monthlyExpense = <?php echo json_encode($monthlyExpense) ?>;
 
-    new Chart(ctx, {
+    const chart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'],
@@ -105,12 +103,21 @@
             }]
         },
         options: {
+            maintainAspectRatio: false,
             scales: {
                 y: {
                     beginAtZero: true
-                }
-            }
-        }
+                },
+            },
+        },
+    });
+
+    $(window).on('beforeprint', () => {
+        chart.resize(600, 600);
+    });
+
+    $(window).on('afterprint', () => {
+        chart.resize();
     });
 
     $(document).ready(function() {
@@ -141,7 +148,7 @@
                 url: "/budget/percentage",
                 success: function(response, _, xhr) {
                     if (xhr.status === 200) {
-                        $("#percentage-budget").text(response.percentage);
+                        $("#percentage-budget").text(response.percentage.toFixed(1));
                         $(".bg-budget").addClass(response.color);
                     }
                 }

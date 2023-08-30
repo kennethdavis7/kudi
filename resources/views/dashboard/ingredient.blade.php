@@ -20,7 +20,7 @@
         </div>
         <div class="col-md-5"></div>
         <div class="col-md-4 text-end">
-            <a href="#" class="btn btn-secondary add" data-bs-toggle="modal" data-bs-target="#create">Add Ingredient</a>
+            <a href="#" class="btn btn-secondary add modal-open-btn" data-bs-toggle="modal" data-bs-target="#create">Add Ingredient</a>
         </div>
         <div class="col-md-12">
             <table class="table w-full mt-4">
@@ -130,7 +130,7 @@
                         </div>
                         <div class="form-group col-md-6">
                             <label for="inputUnit">Unit</label>
-                            <select id="unit" class="form-control">
+                            <select id="unitDecrease" class="form-control">
                             </select>
                         </div>
                     </div>
@@ -170,7 +170,7 @@
                 url: "/budget/percentage",
                 success: function(response, _, xhr) {
                     if (xhr.status === 200) {
-                        $("#percentage-budget").text(response.percentage);
+                        $("#percentage-budget").text(response.percentage.toFixed(1));
                         $(".bg-budget").addClass(response.color);
                     }
                 }
@@ -241,6 +241,26 @@
             });
         }
 
+        function fetchUnits(ingredientTypeId) {
+            const data = {
+                'type': $('#ingredient').val(),
+            };
+
+            const url = `ingredients/${ingredientTypeId}/getUnit`;
+
+            $.ajax({
+                type: "GET",
+                url,
+                success: function(response) {
+                    $("#unit").html("");
+                    $.each(response.units, function(i, item) {
+                        $("#unit").append(`<option value="${item.id}">${item.name}</option>`);
+                        $("#unitDecrease").append(`<option value="${item.id}">${item.name}</option>`);
+                    })
+                }
+            })
+        }
+
         const moneyFormatter = new Intl.NumberFormat('id-ID', {
             style: 'currency',
             currency: 'IDR',
@@ -293,19 +313,20 @@
 
                         for (let j = 0; j < item.ingredient_variants.length; j++) {
                             const variant = item.ingredient_variants[j];
+                            console.log(variant.ingredient_types_id);
                             html += `
                                 <tr id=row-${variant.id}>
                                     <th scope="row" class="text-center align-middle">${j + 1}</th>
                                     <td class="text-center align-middle" id="buy-price-${variant.id}">${moneyFormatter.format(variant.buy_price)}</td>
                                     <td class="text-center align-middle">
                                         <span id="current-qty-${variant.id}">${variant.current_qty}</span>
-                                        ${variant.unit.abbrevation}
+                                        ${variant.unit.abbreviation}
                                     </td>
                                     <td class="text-center align-middle" id="duration-kept-${variant.id}">${moment(variant.created_at).fromNow(true)}</td>
                                     <td class="d-flex justify-content-center align-middle">
                                         <button type="button" class="btn btn-secondary editVariants" data-ingredient-id="${variant.id}" data-bs-toggle="modal" data-bs-target="#editVariants" style="margin-right:1rem;"><i class="bi bi-pencil-square"></i></button>
                                         <button type="button" data-ingredient-id="${variant.id}" class="btn btn-secondary deleteVariants" style="margin-right:1rem;"><i class="bi bi-trash"></i></button>
-                                        <button type="button" data-ingredient-id="${variant.id}" class="btn btn-secondary decrease-button" data-bs-toggle="modal" data-bs-target="#decrease"><i class="bi bi-arrow-down"></i></button>
+                                        <button type="button" data-types-id="${variant.ingredient_types_id}" data-ingredient-id="${variant.id}" class="btn btn-secondary decrease-button" data-bs-toggle="modal" data-bs-target="#decrease"><i class="bi bi-arrow-down"></i></button>
                                     </td>
                                 </tr>
                             `;
@@ -331,6 +352,9 @@
             e.preventDefault();
 
             const ingredientId = $(this).data("ingredient-id");
+            const ingredientTypesId = $(this).data("types-id");
+            console.log(ingredientTypesId);
+            fetchUnits(ingredientTypesId);
             $("#decrease-id").val(ingredientId);
         })
 
@@ -377,6 +401,7 @@
             e.preventDefault();
 
             const ingredientId = $(this).data("ingredient-id");
+
 
             $.ajax({
                 type: "GET",
@@ -478,23 +503,16 @@
             })
         })
 
+        $(document).on('click', '.modal-open-btn', function(e) {
+            const id = $('#ingredient')?.val();
+            if (id === undefined) return;
+
+            fetchUnits(id);
+        })
+
         $(document).on('change', '#ingredient', function(e) {
             const id = e.target.value;
-
-            const data = {
-                'type': $('#ingredient').val(),
-            }
-
-            $.ajax({
-                type: "GET",
-                url: `ingredients/${id}/getUnit`,
-                success: function(response) {
-                    $("#unit").html("");
-                    $.each(response.units, function(i, item) {
-                        $("#unit").append(`<option value="${item.id}">${item.name}</option>`);
-                    })
-                }
-            })
+            fetchUnits(id);
         });
 
         $(document).on('submit', '#create form', function(e) {

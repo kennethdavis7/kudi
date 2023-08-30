@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->foreignId('unit_category_id');
-            $table->string('abbrevation');
+            $table->string('abbreviation');
             $table->integer('value');
             $table->timestamps();
         });

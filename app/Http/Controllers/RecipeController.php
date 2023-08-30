@@ -31,23 +31,39 @@ class RecipeController extends Controller
             'recipes.description',
             'recipes.recipe_img',
             DB::raw('COUNT(recipe_ingredients.id) - COUNT(user_ingredients.id) AS missing_ingredient_count'),
-            DB::raw('SUM(GREATEST(0, (recipe_ingredients.qty - COALESCE(iv.total_current_qty, 0)))) AS missing_quantity'),
+            DB::raw('SUM(
+                GREATEST(0, ((recipe_ingredients.qty * units.value) - COALESCE(iv.total_current_qty, 0)))
+            ) AS missing_quantity'),
             DB::raw('IF(favorite_recipes.id IS NULL, 0, 1) AS is_favourited')
         )
             ->leftJoin('recipe_ingredients', 'recipe_ingredients.recipe_id', '=', 'recipes.id')
-            ->leftJoin('user_ingredients', function ($join) {
+            ->leftJoin('user_ingredients', function ($join) use ($userId) {
                 $join->on('user_ingredients.ingredient_types_id', '=', 'recipe_ingredients.ingredient_types_id')
-                    ->where('user_ingredients.user_id', '=', auth()->user()->id);
+                    ->where('user_ingredients.user_id', '=', $userId);
             })
-            ->leftJoin(DB::raw('(SELECT ingredient_types_id, SUM(current_qty) AS total_current_qty FROM ingredient_variants WHERE user_id = ' . auth()->user()->id . ' GROUP BY ingredient_types_id) AS iv'), function ($join) {
+            ->leftJoin(DB::raw("(
+                SELECT
+                    ingredient_types_id,
+                    SUM(current_qty * units.value) AS total_current_qty
+                FROM
+                    ingredient_variants
+                LEFT JOIN
+                    units ON units.id = ingredient_variants.unit_id
+                WHERE 
+                    user_id = $userId
+                GROUP BY
+                    ingredient_types_id, units.value
+                ) AS iv"), function ($join) {
                 $join->on('recipe_ingredients.ingredient_types_id', '=', 'iv.ingredient_types_id');
             })
+            ->leftJoin('units', 'units.id', '=', 'recipe_ingredients.unit_id')
             ->leftJoin('favorite_recipes', function ($join) use ($userId) {
                 $join->on('favorite_recipes.recipe_id', '=', 'recipes.id');
                 $join->on('favorite_recipes.user_id', '=', DB::raw("'$userId'"));
             })
             ->groupBy('recipes.id', 'recipes.recipe_name', 'recipes.description', 'recipe_img', 'favorite_recipes.id')
             ->orderBy('missing_quantity', 'asc')
+            ->orderBy('is_favourited', 'asc')
             ->orderBy('missing_ingredient_count', 'asc')
             ->orderBy('recipes.recipe_name', 'asc');
 
@@ -72,8 +88,13 @@ class RecipeController extends Controller
         $ingredients = RecipeIngredient::select(
             'ingredient_types.type',
             'recipe_ingredients.qty',
+            'units.abbreviation AS unit',
             'recipes.recipe_img',
-            DB::raw('GREATEST(0, ((recipe_ingredients.qty * units.value) - COALESCE(iv.total_current_qty, 0))) missing_quantity')
+            DB::raw('GREATEST(
+                0, (
+                    recipe_ingredients.qty - (CAST(COALESCE(iv.total_current_qty, 0) AS DECIMAL(12, 2)) / CAST(units.value AS DECIMAL(12, 2)))
+                )
+            ) missing_quantity'),
         )
             ->leftJoin('recipes', 'recipes.id', '=', 'recipe_ingredients.recipe_id')
             ->leftJoin('user_ingredients', 'user_ingredients.ingredient_types_id', '=', 'recipe_ingredients.ingredient_types_id')
@@ -97,7 +118,7 @@ class RecipeController extends Controller
                 }
             )
             ->leftJoin('units', 'units.id', '=', 'recipe_ingredients.unit_id')
-            ->groupBy('ingredient_types.type', 'recipe_ingredients.qty', 'recipes.recipe_img', 'units.value', 'iv.total_current_qty')
+            ->groupBy('ingredient_types.type', 'recipe_ingredients.qty', 'recipes.recipe_img', 'units.value', 'units.abbreviation', 'iv.total_current_qty')
             ->where('recipes.id', '=', $id)
             ->get();
 

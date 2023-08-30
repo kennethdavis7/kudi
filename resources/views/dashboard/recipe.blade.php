@@ -46,7 +46,7 @@
                 url: "/budget/percentage",
                 success: function(response, _, xhr) {
                     if (xhr.status === 200) {
-                        $("#percentage-budget").text(response.percentage);
+                        $("#percentage-budget").text(response.percentage.toFixed(1));
                         $(".bg-budget").addClass(response.color);
                     }
                 }
@@ -153,7 +153,7 @@
                         if (recipe.missing_quantity != 0) {
                             html += `
                             <span class="text-danger">
-                                Total ${recipe.missing_quantity} missing ingredient${recipe.missing_quantity > 1 ? 's' : ''}
+                                Kekurangan bahan
                             </span>
                         `;
                         }
