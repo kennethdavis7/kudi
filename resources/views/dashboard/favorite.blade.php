@@ -60,6 +60,10 @@
 
         getPercentageBudget();
 
+        function limit(string = '', limit = 0) {
+            return string.substring(0, limit) + "...";
+        }
+
         function getPercentageBudget() {
             $.ajax({
                 type: "GET",
@@ -158,17 +162,17 @@
                             </div>
                         `;
 
-                        if (recipe.missing_quantity != 0) {
+                        if (recipe.missing_quantity > 0) {
                             html += `
-                            <span class="text-danger">
-                                Total ${recipe.missing_quantity} missing ingredient${recipe.missing_quantity > 1 ? 's' : ''}
-                            </span>
-                        `;
+                                <span class="text-danger">
+                                    Kekurangan bahan
+                                </span>
+                            `;
                         }
 
                         html += `
                                         <p class="card-text mt-3">
-                                            ${recipe.description}
+                                            ${limit(recipe.description,100)}
                                         </p>
                                     </div>
                                 </div>

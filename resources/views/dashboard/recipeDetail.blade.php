@@ -60,37 +60,37 @@
                     <li class="list-group-item d-flex justify-content-between align-items-start">
                         <div class="ms-2 me-auto">
                             <div class="fw-bold">Langkah 1</div>
-                            Bersihkan kulit wortel dan cuci bersih.
+                            Bersihkan kangkung dengan direndam air dan dibilas dua kali.
                         </div>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-start">
                         <div class="ms-2 me-auto">
                             <div class="fw-bold">Langkah 2</div>
-                            Iris wortel tipis memanjang. Sisihkan.
+                            Cincang bawang putih dan iris cabe. Sisihkan.
                         </div>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-start">
                         <div class="ms-2 me-auto">
                             <div class="fw-bold">Langkah 3</div>
-                            Larutkan 1 bungkus Tepung Kentucky dengan air sampai larut.
+                            Ambil kuali, kemudian panaskan minyak dan masukkan terasi, bawang putih, dan irisan cabe.
                         </div>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-start">
                         <div class="ms-2 me-auto">
                             <div class="fw-bold">Langkah 4</div>
-                            Masukkan irisan wortel kedalam adonan basah sampai tercampur rata.
+                            Masukkan kangkung yang sudah dicuci bersih.
                         </div>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-start">
                         <div class="ms-2 me-auto">
                             <div class="fw-bold">Langkah 5</div>
-                            Masukkan ke tepung kering Tepung Kentucky sambil ditekan ringan sampai tepung menempel, lalu goreng dalam minyak hingga kecoklatan.
+                            Masukkan garam, gula, dan kaldu jamur. Kemudian tumis sampai kangkung tersebut layu.
                         </div>
                     </li>
                     <li class="list-group-item d-flex justify-content-between align-items-start">
                         <div class="ms-2 me-auto">
                             <div class="fw-bold">Langkah 7</div>
-                            Angkat dan tiriskan. Wortel Crispy siap disajikan.
+                            Angkat dan tiriskan. Kankung terasi siap disajikan
                         </div>
                     </li>
                 </ol>

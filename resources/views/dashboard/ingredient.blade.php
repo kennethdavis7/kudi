@@ -49,11 +49,12 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="ingredient" class="form-label">Ingredient</label>
-                        <select class="form-select" id="ingredient" name="ingredient">
+                        <input class="form-control" list="ingredients" id="ingredient" name="ingredient" placeholder="Type to search...">
+                        <datalist id="ingredients">
                             @foreach($ingredientTypes as $type)
-                            <option value="{{ $type->id }}">{{ $type->type }}</option>
+                            <option data-value="{{ $type->id }}" value="{{ $type->type }}"></option>
                             @endforeach
-                        </select>
+                        </datalist>
                     </div>
                     <div class="mb-3">
                         <label for="price" class="form-label">Price</label>
@@ -511,15 +512,18 @@
         })
 
         $(document).on('change', '#ingredient', function(e) {
-            const id = e.target.value;
+            const shownVal = $("#ingredient").val();
+            const id = $("#ingredients option[value='" + shownVal + "']").data("value");
             fetchUnits(id);
         });
 
         $(document).on('submit', '#create form', function(e) {
             e.preventDefault();
+            const shownVal = $("#ingredient").val();
+            const id = $("#ingredients option[value='" + shownVal + "']").data("value");
 
             const data = {
-                'ingredient': $('#ingredient').val(),
+                'ingredient': id,
                 'price': $('#price').val(),
                 'qty': $('#qty').val(),
                 'unit_id': $('#unit').val(),

@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\AddRecipeController;
 use App\Http\Controllers\BudgetController;
 use GuzzleHttp\Middleware;
 use Illuminate\Support\Facades\Route;
@@ -11,6 +10,7 @@ use App\Http\Controllers\IngredientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\UserRecipeController;
 use App\Models\FavoriteRecipes;
 use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
@@ -39,7 +39,6 @@ Route::post('/register', [RegisterController::class, 'store'])->middleware("gues
 Route::get('/recipes/detail/{id}', [RecipeController::class, 'detail'])->middleware("auth");
 Route::get('/recipes/fetchData/{search}', [RecipeController::class, 'fetchData'])->middleware("auth");
 Route::get('/favorites/fetchData/{search}', [FavoriteController::class, 'fetchData'])->middleware("auth");
-Route::get('/addRecipe', [AddRecipeController::class, 'index'])->middleware("auth");
 Route::get('/ingredients/{id}/getUnit', [IngredientController::class, 'getUnit'])->middleware("auth");
 Route::get('/budget', [BudgetController::class, 'get'])->middleware('auth');
 Route::put('/budget', [BudgetController::class, 'store'])->middleware('auth');
@@ -48,5 +47,6 @@ Route::put('/recipes/decrease-ingredients-by-recipe/{id}', [RecipeController::cl
 
 
 Route::resource('/ingredients', IngredientController::class)->middleware("auth");
+Route::resource('/user-recipe', UserRecipeController::class)->middleware("auth");
 Route::resource('/recipes', RecipeController::class)->middleware("auth");
 Route::resource('/favorites', FavoriteController::class)->middleware("auth");

@@ -6,6 +6,7 @@ use App\Models\FavoriteRecipes;
 use App\Models\Recipe;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use App\Models\RecipeIngredient;
 use Illuminate\Support\Facades\Validator;
 
 class FavoriteController extends Controller
@@ -24,30 +25,42 @@ class FavoriteController extends Controller
     public function fetchData($search)
     {
         $userId = auth()->user()->id;
-        $recipes = Recipe::select(
+        $recipes = RecipeIngredient::select(
             'recipes.id',
             'recipes.recipe_name',
             'recipes.description',
             'recipes.recipe_img',
-            DB::raw('COUNT(recipe_ingredients.id) - COUNT(user_ingredients.id) AS missing_ingredient_count'),
-            DB::raw('SUM(GREATEST(0, (recipe_ingredients.qty - COALESCE(iv.total_current_qty, 0)))) AS missing_quantity'),
+            DB::raw('SUM(GREATEST(
+                0, (recipe_ingredients.qty * units.value) - COALESCE(iv.total_current_qty, 0))
+            ) missing_quantity'),
             DB::raw('IF(favorite_recipes.id IS NULL, 0, 1) AS is_favourited')
         )
-            ->leftJoin('recipe_ingredients', 'recipe_ingredients.recipe_id', '=', 'recipes.id')
-            ->leftJoin('user_ingredients', function ($join) {
-                $join->on('user_ingredients.ingredient_types_id', '=', 'recipe_ingredients.ingredient_types_id')
-                    ->where('user_ingredients.user_id', '=', auth()->user()->id);
-            })
-            ->leftJoin(DB::raw('(SELECT ingredient_types_id, SUM(current_qty) AS total_current_qty FROM ingredient_variants WHERE user_id = ' . auth()->user()->id . ' GROUP BY ingredient_types_id) AS iv'), function ($join) {
-                $join->on('recipe_ingredients.ingredient_types_id', '=', 'iv.ingredient_types_id');
-            })
+            ->leftJoin('recipes', 'recipes.id', '=', 'recipe_ingredients.recipe_id')
+            ->leftJoin(
+                DB::raw("
+                (SELECT
+                    ingredient_variants.ingredient_types_id,
+                    SUM(current_qty * units.value) AS total_current_qty
+                FROM
+                    ingredient_variants
+                LEFT JOIN
+                    units ON units.id = ingredient_variants.unit_id
+                WHERE
+                    user_id=$userId
+                GROUP BY
+                    ingredient_types_id
+                ) AS iv"),
+                'iv.ingredient_types_id',
+                '=',
+                'recipe_ingredients.ingredient_types_id'
+            )
+            ->leftJoin('units', 'units.id', '=', 'recipe_ingredients.unit_id')
             ->leftJoin('favorite_recipes', function ($join) use ($userId) {
                 $join->on('favorite_recipes.recipe_id', '=', 'recipes.id');
                 $join->on('favorite_recipes.user_id', '=', DB::raw("'$userId'"));
             })
             ->groupBy('recipes.id', 'recipes.recipe_name', 'recipes.description', 'recipe_img', 'favorite_recipes.id')
             ->orderBy('missing_quantity', 'asc')
-            ->orderBy('missing_ingredient_count', 'asc')
             ->orderBy('recipes.recipe_name', 'asc')
             ->where('favorite_recipes.user_id', '=', auth()->user()->id);
 

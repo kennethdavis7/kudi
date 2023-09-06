@@ -27,24 +27,6 @@ class RecipeController extends Controller
     {
         $userId = auth()->user()->id;
 
-        // dd(DB::select("
-        // SELECT
-        //             user_ingredients.id,
-        //             user_ingredients.ingredient_types_id,
-        //             ingredient_types.type
-        //         FROM
-        //             user_ingredients
-        //         LEFT JOIN
-        //             ingredient_variants ON ingredient_variants.ingredient_types_id = user_ingredients.ingredient_types_id
-        //         LEFT JOIN
-        //             ingredient_types ON ingredient_types.id = user_ingredients.ingredient_types_id
-        //         WHERE
-        //             user_ingredients.user_id = $userId
-        //         GROUP BY
-        //             user_ingredients.ingredient_types_id, user_ingredients.id, ingredient_types.type
-        //         HAVING
-        //             SUM(ingredient_variants.current_qty) > 0
-        //         "));
 
         $recipes = RecipeIngredient::select(
             'recipes.id',

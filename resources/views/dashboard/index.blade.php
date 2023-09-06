@@ -14,7 +14,7 @@
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title mb-4">Ingredient Stocks</h5>
-                        <h5 class="card-subtitle mb-2 text-secondary">{{ $ingredientCount }} ingredients</h5>
+                        <h5 class="card-subtitle mb-2 text-secondary">2 ingredients</h5>
                 </div>
             </div>
         </div>

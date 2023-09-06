@@ -32,9 +32,10 @@ class DashboardController extends Controller
                 $join->on(DB::raw('YEAR(ingredient_variants.created_at)'), '=', DB::raw("'$thisYear'"));
             })
 
-            ->groupBy(DB::raw('MONTH(ingredient_variants.created_at)'), 'months.month')
+            ->groupBy(DB::raw('months.month'))
             ->orderBy('months.month', 'ASC')
             ->pluck('expense');
+
 
         $variantQuery = IngredientVariants::leftJoin('user_ingredients', function ($join) use ($userId) {
             $join->on('user_ingredients.user_id', '=', DB::raw("'$userId'"));
