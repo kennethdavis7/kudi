@@ -37,15 +37,10 @@ class DashboardController extends Controller
             ->pluck('expense');
 
 
-        $variantQuery = IngredientVariants::leftJoin('user_ingredients', function ($join) use ($userId) {
-            $join->on('user_ingredients.user_id', '=', DB::raw("'$userId'"));
-            $join->on('user_ingredients.ingredient_types_id', '=', 'ingredient_variants.ingredient_types_id');
-        });
-
         $ingredientCount = User::find($userId)->ingredientTypes()->count();
 
         if ($ingredientCount > 0) {
-            $longestDurationKept = $variantQuery->clone()->where("current_qty", ">", 0)
+            $longestDurationKept = IngredientVariants::where('user_id', $userId)->where("current_qty", ">", 0)
                 ->min(DB::raw('TIMESTAMPDIFF(SECOND, NOW(), ingredient_variants.created_at)'));
         } else {
             $longestDurationKept = -1;
