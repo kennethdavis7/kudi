@@ -40,9 +40,9 @@
                         <td scope="col"><img src="{{$recipe->recipe_img}}" width="200px" class="shadow-sm rounded"></td>
                         <td scope="col">{{$recipe->recipe_name}}</td>
                         <td scope="col">
-                            <a href="#" class="btn btn-secondary" style="margin-right:1rem;"><i class="bi bi-pencil-square"></i></a>
-                            <a href="#" class="btn btn-secondary" style="margin-right:1rem;"><i class="bi bi-trash"></i></a>
-                            <a href="#" class="btn btn-secondary" style="margin-right:1rem;"><i class="bi bi-eye"></i> </a>
+                            <button class="btn btn-secondary" style="margin-right:1rem;"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-secondary" id="delete-recipe" data-id="{{$recipe->id}}" style="margin-right:1rem;"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-secondary" style="margin-right:1rem;"><i class="bi bi-eye"></i> </button>
                         </td>
                     </tr>
                     <?php $i++; ?>
@@ -52,4 +52,31 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section("script")
+<script>
+    $(document).ready(function() {
+        $(document).on('click', '#delete-recipe', function(e) {
+
+            const id = $(this).data("id");
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            $.ajax({
+                type: "DELETE",
+                url: `/user-recipe/${id}`,
+                success: function(e) {
+                    $(`#row-${id}`).remove();
+                    $(".success_message").show();
+                    $(".success_message").text(response.message);
+                }
+            })
+        })
+    })
+</script>
 @endsection

@@ -40,7 +40,27 @@ class UserRecipeController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // $validator = $request->validate([
+        //     "recipe_img" => 'required|file',
+        //     "recipe_name" => 'required',
+        //     "description" => 'required',
+        // ]);
+
+        // for ($i = 0; $i < $request->ingredient; $i++) {
+        //     $validator["ingredient"] = 
+        //     $validator = $request->ingredient[$i]->validate([
+        //         "ingredient" => 'required',
+        //         "qty" => "required|integer",
+        //         "unit" => "required"
+        //     ]);
+        // }
+
+        // for ($j = 0; $j < $request->step; $j++) {
+        //     $validator = $request->step[$i]->validate([
+        //         "step" => 'required'
+        //     ]);
+        // }
+
     }
 
     /**
@@ -72,6 +92,9 @@ class UserRecipeController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        Recipe::destroy($id);
+        return response()->json([
+            "message" => "Ingredient has been deleted"
+        ], 200);
     }
 }

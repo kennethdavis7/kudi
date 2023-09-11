@@ -177,7 +177,7 @@
 
                         html += `
                                         <p class="card-text mt-3">
-                                            ${limit(recipe.description, 100)}
+                                            ${limit(recipe.description ?? '', 100)}
                                         </p>
                                     </div>
                                 </div>

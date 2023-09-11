@@ -22,4 +22,11 @@ class Recipe extends Model
     {
         return $this->belongstoMany(IngredientTypes::class, "recipe_ingredients");
     }
+
+    protected static function booted()
+    {
+        static::deleting(function (Recipe $recipe) {
+            $recipe->ingredients()->delete();
+        });
+    }
 }
