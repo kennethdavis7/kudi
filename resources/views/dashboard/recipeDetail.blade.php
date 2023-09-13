@@ -9,7 +9,7 @@
             <div>
                 <h1>{{ $recipe->recipe_name }}</h1>
                 <hr>
-                <img src="{{$recipe->recipe_img}}" style="width: 100%; height: 20rem; object-fit: cover;" class="w-100" alt="Fried Rice">
+                <img src="{{ asset('storage/' . $recipe->recipe_img) }}" style="width: 100%; height: 20rem; object-fit: cover;" class="w-100" alt="Fried Rice">
             </div>
 
             <div style="max-height: 100%;">
@@ -31,24 +31,6 @@
                         @endif
                     </li>
                     @endforeach
-
-                    <!-- <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <span class="text-primary">Wortel</span>
-                        <span class="badge bg-primary d-flex align-middle rounded-pill">61 gr</span>
-                    </li>
-
-                    <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <span class="text-danger">Tepung Kentucky</span>
-                        <span class="badge bg-danger d-flex align-middle rounded-pill">75 gr</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <span class="text-danger">Air</span>
-                        <span class="badge bg-danger d-flex align-middle rounded-pill">100 mL</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <span class="text-danger">Minyak Goreng</span>
-                        <span class="badge bg-danger d-flex align-middle rounded-pill">Optional</span>
-                    </li> -->
                 </ul>
             </div>
         </div>
@@ -57,43 +39,16 @@
                 <h3>Procedure</h3>
                 <hr>
                 <ol class="list-group">
+                    @foreach ($recipe->steps as $step)
                     <li class="list-group-item d-flex justify-content-between align-items-start">
                         <div class="ms-2 me-auto">
-                            <div class="fw-bold">Langkah 1</div>
-                            Bersihkan kangkung dengan direndam air dan dibilas dua kali.
+                            <div class="fw-bold">Langkah {{ $step->order }}</div>
+                            {{ $step->name }}
                         </div>
                     </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <div class="ms-2 me-auto">
-                            <div class="fw-bold">Langkah 2</div>
-                            Cincang bawang putih dan iris cabe. Sisihkan.
-                        </div>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <div class="ms-2 me-auto">
-                            <div class="fw-bold">Langkah 3</div>
-                            Ambil kuali, kemudian panaskan minyak dan masukkan terasi, bawang putih, dan irisan cabe.
-                        </div>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <div class="ms-2 me-auto">
-                            <div class="fw-bold">Langkah 4</div>
-                            Masukkan kangkung yang sudah dicuci bersih.
-                        </div>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <div class="ms-2 me-auto">
-                            <div class="fw-bold">Langkah 5</div>
-                            Masukkan garam, gula, dan kaldu jamur. Kemudian tumis sampai kangkung tersebut layu.
-                        </div>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-start">
-                        <div class="ms-2 me-auto">
-                            <div class="fw-bold">Langkah 7</div>
-                            Angkat dan tiriskan. Kankung terasi siap disajikan
-                        </div>
-                    </li>
+                    @endforeach
                 </ol>
+
                 <div class="mb-5">
                     <form action="/recipes/decrease-ingredients-by-recipe/{{ $recipe->id }}" method="POST">
                         @csrf

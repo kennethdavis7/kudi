@@ -20,7 +20,7 @@
         </div>
         <div class="col-md-4"></div>
         <div class="col-md-4 text-end">
-            <a href="/user-recipe/create" class="btn btn-secondary add modal-open-btn">Add Recipe</a>
+            <a href="/user-recipes/create" class="btn btn-secondary add modal-open-btn">Add Recipe</a>
         </div>
         <div class="col-md-12">
             <table class="table w-full mt-4">
@@ -36,10 +36,10 @@
                     <?php $i = 1; ?>
                     @foreach($recipes as $recipe)
                     <tr>
-                        <th scope="col">{{$i}}</td>
-                        <td scope="col"><img src="{{$recipe->recipe_img}}" width="200px" class="shadow-sm rounded"></td>
-                        <td scope="col">{{$recipe->recipe_name}}</td>
-                        <td scope="col">
+                        <th scope="col" class="align-middle">{{$i}}</td>
+                        <td scope="col" class="align-middle"><img src="{{ asset('storage/' . $recipe->recipe_img) }}" width="200px" class="shadow-sm rounded"></td>
+                        <td scope="col" class="align-middle">{{$recipe->recipe_name}}</td>
+                        <td scope="col" class="align-middle">
                             <button class="btn btn-secondary" style="margin-right:1rem;"><i class="bi bi-pencil-square"></i></button>
                             <button class="btn btn-secondary" id="delete-recipe" data-id="{{$recipe->id}}" style="margin-right:1rem;"><i class="bi bi-trash"></i></button>
                             <button class="btn btn-secondary" style="margin-right:1rem;"><i class="bi bi-eye"></i> </button>
@@ -69,7 +69,7 @@
 
             $.ajax({
                 type: "DELETE",
-                url: `/user-recipe/${id}`,
+                url: `/user-recipes/${id}`,
                 success: function(e) {
                     $(`#row-${id}`).remove();
                     $(".success_message").show();

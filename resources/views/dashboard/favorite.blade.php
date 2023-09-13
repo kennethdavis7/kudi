@@ -147,7 +147,7 @@
                     <div id="card-${recipe.id}">
                         <div  class="card h-100 d-flex flex-column justify-content-between">
                             <div>
-                                <img class="card-img-top" style="width: 100%; height: 15rem; object-fit: cover;" src="${recipe.recipe_img}" alt="Card image cap">
+                                <img class="card-img-top" style="width: 100%; height: 15rem; object-fit: cover;" src="{{ asset('storage/' . '${recipe.recipe_img}') }}" alt="Card image cap">
                                 <div class="card-body">
                                     <div>
                                         <div class="d-flex justify-content-between">

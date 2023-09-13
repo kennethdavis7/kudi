@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\IngredientTypes;
 use Illuminate\Http\Request;
 use App\Models\Recipe;
+use App\Models\RecipeIngredient;
+use App\Models\RecipeStep;
+use Illuminate\Support\Facades\DB;
 
 class UserRecipeController extends Controller
 {
@@ -34,33 +37,55 @@ class UserRecipeController extends Controller
         ]);
     }
 
-    
+
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        // $validator = $request->validate([
-        //     "recipe_img" => 'required|file',
-        //     "recipe_name" => 'required',
-        //     "description" => 'required',
-        // ]);
+        $request->validate([
+            "image" => "required|image|mimes:jpeg,png,jpg,gif,svg|max:2048",
+            "name" => "required",
+            "description" => "required",
+            "ingredients" => "required|array|min:1",
+            "ingredients.*.type_id" => "required|distinct|exists:ingredient_types,id",
+            "ingredients.*.unit_id" => "required|exists:units,id",
+            "ingredients.*.qty" => "required|numeric|integer|min:1",
+            "steps" => "required|array|min:1",
+            "steps.*" => "required",
+        ]);
 
-        // for ($i = 0; $i < $request->ingredient; $i++) {
-        //     $validator["ingredient"] = 
-        //     $validator = $request->ingredient[$i]->validate([
-        //         "ingredient" => 'required',
-        //         "qty" => "required|integer",
-        //         "unit" => "required"
-        //     ]);
-        // }
+        $imagePath = $request->image->store("public/images");
 
-        // for ($j = 0; $j < $request->step; $j++) {
-        //     $validator = $request->step[$i]->validate([
-        //         "step" => 'required'
-        //     ]);
-        // }
+        $userId = auth()->user()->id;
 
+        DB::transaction(function() use ($request, $imagePath, $userId) {
+            $recipe = Recipe::create([
+                "recipe_name" => $request->name,
+                "description" => $request->description,
+                "recipe_img" => $imagePath,
+                "user_id" => $userId,
+            ]);
+
+            foreach ($request->ingredients as $ingredient) {
+                RecipeIngredient::create([
+                    "recipe_id" => $recipe->id,
+                    "ingredient_types_id" => $ingredient["type_id"],
+                    "qty" => $ingredient["qty"],
+                    "unit_id" => $ingredient["unit_id"],
+                ]);
+            }
+
+            foreach ($request->steps as $index => $step) {
+                RecipeStep::create([
+                    "recipe_id" => $recipe->id,
+                    "name" => $step,
+                    "order" => $index + 1,
+                ]);
+            }
+        });
+
+        return response('', 204);
     }
 
     /**

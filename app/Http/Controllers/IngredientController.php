@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Unit;
 use App\Models\UserIngredients;
-use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
@@ -96,7 +95,7 @@ class IngredientController extends Controller
         ], 200);
     }
 
-    /** 
+    /**
      * Show the form for creating a new resource.
      */
     public function create()

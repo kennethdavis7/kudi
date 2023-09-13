@@ -49,7 +49,7 @@ class RecipeController extends Controller
                 LEFT JOIN
                     units ON units.id = ingredient_variants.unit_id
                 WHERE
-                    user_id=$userId
+                    user_id = $userId
                 GROUP BY
                     ingredient_types_id
                 ) AS iv"),
@@ -81,7 +81,11 @@ class RecipeController extends Controller
 
     public function detail($id)
     {
-        $recipe = Recipe::find($id);
+        $recipe = Recipe::with([
+            'steps' => function ($query) {
+                $query->orderBy('order', 'ASC');
+            }
+        ])->find($id);
         $userId = auth()->user()->id;
 
         $ingredients = RecipeIngredient::select(

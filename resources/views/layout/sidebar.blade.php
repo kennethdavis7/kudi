@@ -29,7 +29,7 @@
       </a>
     </li>
     <li>
-      <a href="/user-recipe" class="nav-link link-body-emphasis d-flex align-items-center {{$active == 'user recipe' ? 'active-sd' : ''}}">
+      <a href="/user-recipes" class="nav-link link-body-emphasis d-flex align-items-center {{$active == 'user recipe' ? 'active-sd' : ''}}">
         <img src="{{asset('img/recipe-book.png')}}" width="20px" style="margin-right: 0.75rem;" alt="">
         Your Recipes
       </a>

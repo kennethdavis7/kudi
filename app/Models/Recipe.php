@@ -9,7 +9,7 @@ class Recipe extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['recipe_name', 'recipe_img', 'user_id', 'procedure'];
+    protected $fillable = ['recipe_name', 'recipe_img', 'user_id', 'description'];
 
     public function scopeFilter($query, $search)
     {
@@ -23,10 +23,16 @@ class Recipe extends Model
         return $this->belongstoMany(IngredientTypes::class, "recipe_ingredients");
     }
 
+    public function steps()
+    {
+        return $this->hasMany(RecipeStep::class);
+    }
+
     protected static function booted()
     {
         static::deleting(function (Recipe $recipe) {
-            $recipe->ingredients()->delete();
+            $recipe->ingredients()->detach();
+            $recipe->steps()->delete();
         });
     }
 }

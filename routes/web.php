@@ -1,9 +1,7 @@
 <?php
 
 use App\Http\Controllers\BudgetController;
-use GuzzleHttp\Middleware;
 use Illuminate\Support\Facades\Route;
-use \App\Http\Middleware\Authenticates;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\IngredientController;
@@ -11,8 +9,6 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\UserRecipeController;
-use App\Models\FavoriteRecipes;
-use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,29 +21,51 @@ use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 |
 */
 
-Route::get('/', [DashboardController::class, 'index'])->middleware("auth");
-Route::get('/ingredients/creation-times', [IngredientController::class, 'fetchCreationTimes'])->middleware("auth");
-Route::get('/ingredients/fetchData/{search}', [IngredientController::class, 'fetchData'])->middleware("auth");
-Route::put('/ingredients/decrease/{id}', [IngredientController::class, 'decrease'])->middleware("auth");
-Route::delete('/ingredients/deleteVariant/{ingredientVariant}', [IngredientController::class, 'deleteVariant'])->middleware("auth");
-Route::get('/login', [LoginController::class, 'index'])->middleware("guest");
-Route::post('/login', [LoginController::class, 'store'])->name("login");
-Route::get('/logout', [LoginController::class, 'logout'])->middleware("auth");
-Route::get('/dashboard', [DashboardController::class, 'index'])->middleware("auth");
-Route::get('/register', [RegisterController::class, 'index'])->middleware("guest");
-Route::post('/register', [RegisterController::class, 'store'])->middleware("guest");
-Route::get('/recipes/detail/{id}', [RecipeController::class, 'detail'])->middleware("auth");
-Route::get('/recipes/fetchData/{search}', [RecipeController::class, 'fetchData'])->middleware("auth");
-Route::get('/favorites/fetchData/{search}', [FavoriteController::class, 'fetchData'])->middleware("auth");
-Route::get('/ingredients/{id}/getUnit', [IngredientController::class, 'getUnit'])->middleware("auth");
-Route::get('/user-recipe/ingredients/{id}/getUnit', [IngredientController::class, 'getUnit'])->middleware("auth");
-Route::get('/budget', [BudgetController::class, 'get'])->middleware('auth');
-Route::put('/budget', [BudgetController::class, 'store'])->middleware('auth');
-Route::get('/budget/percentage', [BudgetController::class, 'getPercentageBudget'])->middleware('auth');
-Route::put('/recipes/decrease-ingredients-by-recipe/{id}', [RecipeController::class, 'decreaseIngredientsByRecipe'])->middleware('auth');
+Route::middleware(['guest'])->group(function() {
+    Route::controller(LoginController::class)->group(function() {
+        Route::get('/login', 'index');
+        Route::post('/login', 'store')->name("login");
+    });
 
+    Route::controller(RegisterController::class)->group(function() {
+        Route::get('/register', 'index');
+        Route::post('/register', 'store');
+    });
+});
 
-Route::resource('/ingredients', IngredientController::class)->middleware("auth");
-Route::resource('/user-recipe', UserRecipeController::class)->middleware("auth");
-Route::resource('/recipes', RecipeController::class)->middleware("auth");
-Route::resource('/favorites', FavoriteController::class)->middleware("auth");
+Route::middleware(['auth'])->group(function() {
+    Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::redirect('/', '/dashboard');
+
+    Route::get('/logout', [LoginController::class, 'logout']);
+
+    Route::resource('/ingredients', IngredientController::class);
+    Route::resource('/user-recipes', UserRecipeController::class);
+    Route::resource('/recipes', RecipeController::class);
+    Route::resource('/favorites', FavoriteController::class);
+
+    Route::controller(IngredientController::class)->group(function() {
+        Route::get('/ingredients/creation-times', 'fetchCreationTimes');
+        Route::get('/ingredients/fetchData/{search}', 'fetchData');
+        Route::put('/ingredients/decrease/{id}', 'decrease');
+        Route::delete('/ingredients/deleteVariant/{ingredientVariant}', 'deleteVariant');
+
+        Route::get('/ingredients/{id}/getUnit', 'getUnit');
+    });
+
+    Route::controller(RecipeController::class)->group(function() {
+        Route::get('/recipes/detail/{id}', 'detail');
+        Route::get('/recipes/fetchData/{search}', 'fetchData');
+        Route::put('/recipes/decrease-ingredients-by-recipe/{id}', 'decreaseIngredientsByRecipe');
+    });
+
+    Route::controller(BudgetController::class)->group(function() {
+        Route::get('/budget', 'get');
+        Route::put('/budget', 'store');
+        Route::get('/budget/percentage', 'getPercentageBudget');
+    });
+
+    Route::controller(FavoriteController::class)->group(function() {
+        Route::get('/favorites/fetchData/{search}', 'fetchData');
+    });
+});
