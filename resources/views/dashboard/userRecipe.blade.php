@@ -40,7 +40,7 @@
     </div>
 
 
-    <div class="d-flex justify-content-end mt-3" style="margin-right:1.5rem;">
+    <div class="container-pagination d-flex justify-content-end mt-3" style="margin-right:1.5rem;">
         <nav aria-label="...">
             <ul class="pagination">
             </ul>
@@ -132,12 +132,15 @@
                 url: `/user-recipes/fetch-data/${search}/?page=${currentPage}`,
                 success: function(response) {
                     $("#recipes-table").html("");
+                    $(".empty-data").remove();
                     if (response.data.length === 0) {
-                        $("<h3 class='empty-data text-center'>You haven't made any recipes</h3>").insertAfter("#recipes");
+                        $("<h3 class='empty-data text-center'>Not Found</h3>").insertAfter("#recipes");
+                        $(".container-pagination").addClass("d-none");
                         return;
                     };
 
                     $(".empty-data").remove();
+                    $(".container-pagination").removeClass("d-none");
 
                     let html = '';
                     $("#recipes-table").html("");

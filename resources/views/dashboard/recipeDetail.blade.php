@@ -49,6 +49,14 @@
                     @endforeach
                 </ol>
 
+                <?php
+                $total_missing_qty = 0;
+                foreach ($ingredients as $ingredient) {
+                    $total_missing_qty += $ingredient->missing_quantity;
+                }
+                ?>
+
+                @if($total_missing_qty == 0)
                 <div class="mb-5">
                     <form action="/recipes/decrease-ingredients-by-recipe/{{ $recipe->id }}" id="useIngredientsForm" method="POST">
                         @csrf
@@ -57,30 +65,31 @@
                         <button type="submit" class="btn btn-secondary mb-5 mt-3 decreaseIngredientsByRecipe" style="width: 100%;" id="submitUseIngredients">Gunakan bahan dalam penyimpanan</button>
                     </form>
                 </div>
+                @endif
             </div>
         </div>
     </div>
 </div>
 @endsection
-
 @section('script')
-    <script>
-        const ingredients = {!! $ingredients->toJson() !!}
+<script>
+    const ingredients = {
+        !!$ingredients - > toJson() !!
+    }
 
-        $('#submitUseIngredients').on('click', function(e) {
-            e.preventDefault();
-            
-            if(ingredients.some(x => x.missing_quantity > 0)){
-                swal.fire(
-                    'Warning!',
-                    'Kuantitas bahan dalam penyimpanan masih kurang, mohon tambahkan bahan terlebih dahulu!',
-                    'warning'
-                )
-            }
-            else{
-                $(this).hide()
-                $('#useIngredientsForm').submit()
-            }
-        })
-    </script>
+    $('#submitUseIngredients').on('click', function(e) {
+        e.preventDefault();
+
+        if (ingredients.some(x => x.missing_quantity > 0)) {
+            swal.fire(
+                'Warning!',
+                'Kuantitas bahan dalam penyimpanan masih kurang, mohon tambahkan bahan terlebih dahulu!',
+                'warning'
+            )
+        } else {
+            $(this).hide()
+            $('#useIngredientsForm').submit()
+        }
+    })
+</script>
 @endsection

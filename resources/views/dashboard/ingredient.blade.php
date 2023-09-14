@@ -146,7 +146,7 @@
 
 
 
-    <div class="d-flex justify-content-end mt-3" style="margin-right:1.5rem;">
+    <div class="container-pagination d-flex justify-content-end mt-3" style="margin-right:1.5rem;">
         <nav aria-label="...">
             <ul class="pagination">
             </ul>
@@ -279,11 +279,14 @@
                     totalPages = Math.ceil(response.ingredients.total / response.ingredients.per_page);
 
                     $("#data-ingredients-table").html("");
+                    $(".empty-data").remove();
                     if (response.ingredients.data.length === 0) {
-                        $("<h3 class='empty-data text-center'>You haven't added any ingredients</h3>").insertAfter("#ingredients-table");
+                        $("<h3 class='empty-data text-center'>Not Found</h3>").insertAfter("#ingredients-table");
+                        $(".container-pagination").addClass("d-none");
                         return;
                     };
 
+                    $(".container-pagination").removeClass("d-none");
                     $(".empty-data").remove();
 
                     $.each(response.ingredients.data, function(i, item) {

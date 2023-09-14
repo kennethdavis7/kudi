@@ -42,7 +42,7 @@
     </div>
 
 
-    <div class="d-flex justify-content-end mt-5" style="margin-right:1.5rem;">
+    <div class="container-pagination d-flex justify-content-end mt-5" style="margin-right:1.5rem;">
         <nav aria-label="...">
             <ul class="pagination">
             </ul>
@@ -141,10 +141,14 @@
                 success: function(response) {
                     $("#recipes").html("");
                     if (response.recipes.data.length === 0) {
-                        $("#recipes").append("<h3 class='empty-data text-center'>You haven't favorited any recipes</h3>");
+                        $("#recipes").append("<h3 class='empty-data text-center'>Not Found</h3>");
                         $("#recipes").addClass("d-flex justify-content-center");
+                        $(".container-pagination").addClass("d-none");
                         return;
                     };
+
+                    $("#recipes").removeClass("d-flex justify-content-center");
+                    $(".container-pagination").removeClass("d-none");
 
                     let html = '';
                     $.each(response.recipes.data, function(i, recipe) {

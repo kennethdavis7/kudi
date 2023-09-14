@@ -34,7 +34,7 @@
         <hr class="mb-5">
         <div class="col-md-4 mb-0">
             <div class="d-flex" role="search">
-                <input class="form-control me-2 search" type="search" placeholder="Search" aria-label="Search">
+                <input class="form-control me-2 search" id="search" type="search" placeholder="Search" aria-label="Search">
             </div>
         </div>
     </div>
@@ -43,7 +43,7 @@
         <div id="recipes" class="gap-4"></div>
     </div>
 
-    <div class="d-flex justify-content-end mt-5" style="margin-right:1.5rem;">
+    <div class="container-pagination d-flex justify-content-end mt-5" style="margin-right:1.5rem;">
         <nav aria-label="...">
             <ul class="pagination">
             </ul>
@@ -140,6 +140,15 @@
                 success: function(response) {
                     let html = '';
                     $("#recipes").html("");
+                    if (response.recipes.data.length === 0) {
+                        $("#recipes").append("<h3 class='empty-data text-center'>Not Found</h3>");
+                        $("#recipes").addClass("d-flex justify-content-center");
+                        $(".container-pagination").addClass("d-none");
+                        return;
+                    };
+
+                    $("#recipes").removeClass("d-flex justify-content-center");
+                    $(".container-pagination").removeClass("d-none");
                     $.each(response.recipes.data, function(i, recipe) {
                         html += `
                             <div class="card h-100 d-flex flex-column justify-content-between">
