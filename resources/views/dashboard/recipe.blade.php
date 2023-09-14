@@ -86,7 +86,7 @@
             fetchData();
         }
 
-        function addPaginationControls(ingredients) {
+        function addPaginationControls(recipes) {
             $(".pagination").html("");
 
             const isFirstPage = currentPage === 1;
@@ -103,7 +103,7 @@
             };
 
             const addPageNumber = (pageNumber) => {
-                const link = ingredients.links[pageNumber];
+                const link = recipes.links[pageNumber];
                 addPaginationControl(link.active, pageNumber, link.label);
             };
 
@@ -190,7 +190,6 @@
                         </div>
                         `;
                     });
-
                     $("#recipes").append(html);
                     addPaginationControls(response.recipes);
                 }

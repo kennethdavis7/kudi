@@ -31,7 +31,7 @@
         </div>
         <hr class="mb-5">
         <div class="col-md-4 mb-0">
-            <div class="d-flex" role="search">
+            <div class="d-flex" id="search" role="search">
                 <input class="form-control me-2 search" type="search" placeholder="Search" aria-label="Search">
             </div>
         </div>
@@ -139,8 +139,14 @@
                 url: `/favorites/fetchData/${search}/?page=${currentPage}`,
                 dataType: "json",
                 success: function(response) {
-                    let html = '';
                     $("#recipes").html("");
+                    if (response.recipes.data.length === 0) {
+                        $("#recipes").append("<h3 class='empty-data text-center'>You haven't favorited any recipes</h3>");
+                        $("#recipes").addClass("d-flex justify-content-center");
+                        return;
+                    };
+
+                    let html = '';
                     $.each(response.recipes.data, function(i, recipe) {
 
                         html += `
@@ -211,6 +217,8 @@
                 success: function(response, _, xhr) {
                     if (xhr.status === 200) {
                         $(`#card-${recipeId}`).remove();
+                        $(`.pagination`).remove();
+                        fetchData();
                     }
                 },
             })

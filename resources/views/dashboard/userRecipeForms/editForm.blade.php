@@ -4,13 +4,13 @@
 @section("body")
 @include("layout.sidebar")
 <div class="container">
-    <form id="add-form">
+    <form id="edit-form">
         @csrf
 
         <div class="row mt-5 mb-0 mx-3">
             <div class="col-md-12 d-flex justify-content-between align-items-center">
-                <h1 class="mb-3">Add Recipe</h1>
-                <button id="addRecipeButton" class="btn btn-secondary">Add Recipe</button>
+                <h1 class="mb-3">Edit Recipe</h1>
+                <button id="editRecipeButton" class="btn btn-secondary">Edit Recipe</button>
             </div>
             <hr>
             <div class="form-check form-switch d-flex justify-content-end">
@@ -19,28 +19,29 @@
             </div>
             <div class="col-md-12">
                 <div class="mb-3">
+                    <img src="{{asset('storage/' . $recipes->recipe_img)}}" alt="..." width="200px" class="img-thumbnail d-block mb-4">
                     <label for="formFile" class="form-label">Image</label>
-                    <input class="form-control" type="file" id="formFile" name="image" required>
+                    <input class="form-control" type="file" id="formFile" name="image">
                 </div>
                 <div class="mb-3">
                     <label for="recipeName" class="form-label">Recipe Name</label>
-                    <input type="text" class="form-control" id="recipeName" name="name" placeholder="Nasi Goreng" required>
+                    <input type="text" class="form-control" id="recipeName" name="name" value="{{$recipes->recipe_name}}" placeholder="Nasi Goreng" required>
                 </div>
                 <div class="mb-3">
                     <label for="description" class="form-label">Description</label>
-                    <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    <textarea class="form-control" id="description" name="description" rows="3" required>{{$recipes->description}}</textarea>
                 </div>
             </div>
 
             <div class="d-flex justify-content-between mt-3 mb-5">
                 <div class="col-md-6">
                     <div id="recipeIngredients"></div>
-                    <button class="btn border border-secondary text-secondary w-100 mt-3" id="addIngredient" type="button">Add Ingredient</button>
+                    <button class="btn border border-secondary text-secondary w-100 mt-3" id="editIngredient" type="button">Add Ingredient</button>
                 </div>
 
                 <div class="col-md-5">
                     <div id="recipeSteps"></div>
-                    <button class="btn border border-secondary text-secondary w-100 mt-3" id="addStep" type="button">Add Step</button>
+                    <button class="btn border border-secondary text-secondary w-100 mt-3" id="editStep" type="button">Add Step</button>
                 </div>
             </div>
         </div>
@@ -50,32 +51,31 @@
 
 @section("script")
 <script>
-    const INGREDIENTS_KEY = 'add-form-ingredients';
-    const STEPS_KEY = 'add-form-steps';
-    const RECIPE_NAME_KEY = 'add-form-recipe-name';
-    const DESCRIPTION_KEY = 'add-form-recipe-description';
+    const INGREDIENTS_KEY = 'edit-form-ingredients';
+    const STEPS_KEY = 'edit-form-steps';
+    const RECIPE_NAME_KEY = 'edit-form-recipe-name';
+    const DESCRIPTION_KEY = 'edit-form-recipe-description';
     const STATUS_KEY = 'edit-form-recipe-status';
+    const editSteps = <?php echo json_encode($steps); ?>;
+    const editIngredients = <?php echo json_encode($ingredients); ?>;
+    const editRecipe = <?php echo json_encode($recipes); ?>;
 
     let ingredients = [],
         steps = [];
     hydrateSavedFields();
 
     function hydrateSavedFields() {
-        ingredients = JSON.parse(localStorage.getItem(INGREDIENTS_KEY)) || Array.from({
-                length: 3
-            },
-            () => ({
-                typeId: null,
-                qty: 0,
-                unitId: null,
-            })
-        );
+        ingredients = JSON.parse(localStorage.getItem(INGREDIENTS_KEY)) || editIngredients.map((ingredient) => {
+            return {
+                typeId: ingredient.ingredient_types_id,
+                qty: ingredient.qty,
+                unitId: ingredient.unit_id,
+            }
+        });
 
-        steps = JSON.parse(localStorage.getItem(STEPS_KEY)) || Array.from({
-                length: 3
-            },
-            () => '',
-        );
+        steps = JSON.parse(localStorage.getItem(STEPS_KEY)) || editSteps.map((step) => {
+            return step.name;
+        })
     }
 
     /**
@@ -96,7 +96,7 @@
 
         function switchStatus(click) {
             if (click === true) {
-                if (localStorage.getItem(STATUS_KEY) == 0) {
+                if (localStorage.getItem(STATUS_KEY) == 0 || localStorage.getItem(STATUS_KEY) === null) {
                     localStorage.setItem(STATUS_KEY, 1);
                     $("#labelStatus").text("Public");
                     $('#switchStatus').prop('checked', true);
@@ -106,7 +106,7 @@
                     $('#switchStatus').prop('checked', false);
                 }
             } else {
-                if (localStorage.getItem(STATUS_KEY) == 1) {
+                if (localStorage.getItem(STATUS_KEY) === 1 || editRecipe.status === 1) {
                     $("#labelStatus").text("Public");
                     $('#switchStatus').prop('checked', true);
                 } else {
@@ -121,10 +121,14 @@
             switchStatus(true);
         })
 
+        $(".refreshStorage").on('click', function() {
+            clearSavedFields();
+        })
+
         /**
          * Prevent enter from submitting the form.
          */
-        $('#add-form').on('keypress', function(e) {
+        $('#edit-form').on('keypress', function(e) {
             const isInput = e.target.tagName.toLowerCase() === 'input';
 
             if (isInput && e.keyCode === 13) {
@@ -132,10 +136,12 @@
             }
         });
 
-        $('#add-form').on('submit', function(e) {
+        $('#edit-form').on('submit', function(e) {
             e.preventDefault();
 
             const formData = new FormData(this);
+
+            formData.append('_method', 'PUT');
 
             /**
              * Make sure there is at least 1 ingredient and at least 1 step.
@@ -160,11 +166,9 @@
                 if (!value) return;
             }
 
-            console.log(formData)
-
             $.ajax({
                 method: 'POST',
-                url: '/user-recipes',
+                url: `/user-recipes/${editRecipe.id}`,
                 data: formData,
                 contentType: false,
                 processData: false,
@@ -182,6 +186,11 @@
      * -- Recipe details.
      */
     $(document).ready(function() {
+
+        if (localStorage.getItem(RECIPE_NAME_KEY) === null && localStorage.getItem(DESCRIPTION_KEY) === null) {
+            localStorage.setItem(RECIPE_NAME_KEY, editRecipe.recipe_name);
+            localStorage.setItem(DESCRIPTION_KEY, editRecipe.description);
+        }
 
         $('#recipeName').val(localStorage.getItem(RECIPE_NAME_KEY));
         $('#description').val(localStorage.getItem(DESCRIPTION_KEY));
@@ -204,7 +213,7 @@
 
         renderInputSteps();
 
-        function addInputStep() {
+        function editInputStep() {
             steps.push('');
             saveAndRefreshSteps();
         }
@@ -220,6 +229,7 @@
         }
 
         function renderInputSteps() {
+
             $("#recipeSteps").html("");
 
             for (let i = 0; i < steps.length; i++) {
@@ -253,7 +263,7 @@
             localStorage.setItem(STEPS_KEY, JSON.stringify(steps));
         }
 
-        $(document).on('click', '#addStep', addInputStep);
+        $(document).on('click', '#editStep', editInputStep);
 
         $(document).on('click', '.delete-step', function() {
             const index = $(this).data("index");
@@ -278,7 +288,7 @@
         renderInputIngredients();
         fetchUnitsForAll();
 
-        function addInputIngredient() {
+        function editInputIngredient() {
             ingredients.push({
                 qty: 0,
                 typeId: null,
@@ -388,8 +398,8 @@
             saveInputIngredients();
         }
 
-        $(document).on('click', '#addIngredient', function() {
-            addInputIngredient();
+        $(document).on('click', '#editIngredient', function() {
+            editInputIngredient();
         })
 
         $(document).on('click', '.delete-ingredient', function() {

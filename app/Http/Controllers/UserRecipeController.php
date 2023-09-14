@@ -16,12 +16,22 @@ class UserRecipeController extends Controller
      */
     public function index()
     {
-        $recipes = Recipe::where('user_id', auth()->user()->id)->get();
         return view('dashboard.userRecipe', [
             'title' => 'Your Recipe',
             'active' => 'user recipe',
-            'recipes' => $recipes
         ]);
+    }
+
+    public function fetchData($search)
+    {
+        $recipes = Recipe::where('user_id', auth()->user()->id);
+
+        if ($search != "all") {
+            $recipes = $recipes->where("recipe_name", "LIKE", "%" . $search . "%");
+        }
+
+        $recipes = $recipes->paginate(5);
+        return response()->json($recipes);
     }
 
     /**
@@ -29,6 +39,7 @@ class UserRecipeController extends Controller
      */
     public function create()
     {
+
         $ingredientTypes = IngredientTypes::get();
         return view('dashboard.userRecipeForms.addForm', [
             'title' => 'Your Recipe',
@@ -44,7 +55,7 @@ class UserRecipeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            "image" => "required|image|mimes:jpeg,png,jpg,gif,svg|max:2048",
+            "image" => "required|image|mimes:jpeg,png,jpg,gif,svg",
             "name" => "required",
             "description" => "required",
             "ingredients" => "required|array|min:1",
@@ -55,16 +66,17 @@ class UserRecipeController extends Controller
             "steps.*" => "required",
         ]);
 
-        $imagePath = $request->image->store("public/images");
+        $imagePath = $request->image->store("public/images/recipes");
 
         $userId = auth()->user()->id;
 
-        DB::transaction(function() use ($request, $imagePath, $userId) {
+        DB::transaction(function () use ($request, $imagePath, $userId) {
             $recipe = Recipe::create([
                 "recipe_name" => $request->name,
                 "description" => $request->description,
                 "recipe_img" => $imagePath,
                 "user_id" => $userId,
+                "status" => (int) $request->status
             ]);
 
             foreach ($request->ingredients as $ingredient) {
@@ -101,15 +113,110 @@ class UserRecipeController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $recipes = Recipe::find($id);
+        $steps = RecipeStep::where('recipe_id', $id)->get();
+        $ingredients = RecipeIngredient::where('recipe_id', $id)->get();
+        $ingredientTypes = IngredientTypes::get();
+
+        return view('dashboard.userRecipeForms.editForm', [
+            'title' => 'Your Recipe',
+            'active' => 'user recipe',
+            'recipes' => $recipes,
+            'types' => $ingredientTypes,
+            'steps' => $steps,
+            'ingredients' => $ingredients
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $recipeId)
     {
-        //
+        $request->validate([
+            "image" => "image|mimes:jpeg,png,jpg,gif,svg",
+            "name" => "required",
+            "description" => "required",
+            "ingredients" => "required|array|min:1",
+            "ingredients.*.type_id" => "required|distinct|exists:ingredient_types,id",
+            "ingredients.*.unit_id" => "required|exists:units,id",
+            "ingredients.*.qty" => "required|numeric|integer|min:1",
+            "steps" => "required|array|min:1",
+            "steps.*" => "required"
+        ]);
+
+        $recipeObj = Recipe::find($recipeId);
+
+        if ($request->image === null) {
+            $imagePath = $recipeObj->recipe_img;
+        } else {
+            $imagePath = $request->image->store("public/images/recipes");
+        }
+
+        $userId = auth()->user()->id;
+
+        $recipe = Recipe::where('id', $recipeId)
+            ->where('user_id', $userId)
+            ->first();
+
+        if (!$recipe) return response('', 404);
+
+        DB::transaction(function () use ($request, $imagePath, $userId, $recipeId, $recipe) {
+            $recipe->update([
+                "recipe_name" => $request->name,
+                "description" => $request->description,
+                "recipe_img" => $imagePath,
+                "user_id" => $userId,
+                "status" => (int) $request->status
+            ]);
+
+            RecipeIngredient::where('recipe_id', $recipeId)->delete();
+
+            foreach ($request->ingredients as $ingredient) {
+                RecipeIngredient::create([
+                    "recipe_id" => $recipe->id,
+                    "ingredient_types_id" => $ingredient["type_id"],
+                    "qty" => $ingredient["qty"],
+                    "unit_id" => $ingredient["unit_id"],
+                ]);
+            }
+
+            RecipeStep::where('recipe_id', $recipeId)->delete();
+
+            foreach ($request->steps as $index => $step) {
+                RecipeStep::create([
+                    "recipe_id" => $recipe->id,
+                    "name" => $step,
+                    "order" => $index + 1,
+                ]);
+            }
+        });
+
+
+        return response('', 204);
+    }
+
+    public function changeStatus(Request $request)
+    {
+        $request->validate([
+            "id" => "required|exists:recipes,id",
+            "status" => "required|integer|numeric",
+        ]);
+
+        $recipeId = $request->id;
+        $status = $request->status;
+
+        if ($status != 1) {
+            Recipe::where('id', $recipeId)->update([
+                'status' => 1
+            ]);
+        } else {
+            Recipe::where('id', $recipeId)->update([
+                'status' => 0
+            ]);
+        }
+
+        return response('', 204);
     }
 
     /**
@@ -119,7 +226,7 @@ class UserRecipeController extends Controller
     {
         Recipe::destroy($id);
         return response()->json([
-            "message" => "Ingredient has been deleted"
+            "message" => "Recipe has been deleted"
         ], 200);
     }
 }

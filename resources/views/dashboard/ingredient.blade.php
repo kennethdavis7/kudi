@@ -15,7 +15,7 @@
         <hr class="mb-5">
         <div class="col-md-4 mb-0">
             <div class="d-flex" role="search">
-                <input class="form-control me-2 search" type="search" placeholder="Search" aria-label="Search">
+                <input class="form-control me-2 search" id="search" type="search" placeholder="Search" aria-label="Search">
             </div>
         </div>
         <div class="col-md-4"></div>
@@ -23,7 +23,7 @@
             <a href="#" class="btn btn-secondary add modal-open-btn" data-bs-toggle="modal" data-bs-target="#create">Add Ingredient</a>
         </div>
         <div class="col-md-12">
-            <table class="table w-full mt-4">
+            <table id="ingredients-table" class="table w-full mt-4">
                 <thead>
                     <tr>
                         <th></th>
@@ -32,7 +32,7 @@
                         <th scope="col" style="text-align: center">Action</th>
                     </tr>
                 </thead>
-                <tbody class="tbody" id="ingredients-table"></tbody>
+                <tbody class="tbody" id="data-ingredients-table"></tbody>
             </table>
         </div>
     </div>
@@ -278,7 +278,13 @@
                 success: function(response) {
                     totalPages = Math.ceil(response.ingredients.total / response.ingredients.per_page);
 
-                    $("#ingredients-table").html("");
+                    $("#data-ingredients-table").html("");
+                    if (response.ingredients.data.length === 0) {
+                        $("<h3 class='empty-data text-center'>You haven't added any ingredients</h3>").insertAfter("#ingredients-table");
+                        return;
+                    };
+
+                    $(".empty-data").remove();
 
                     $.each(response.ingredients.data, function(i, item) {
                         const accordionId = `accordion-${item.id}`;
@@ -341,7 +347,7 @@
                             </tr>
                         `;
 
-                        $('#ingredients-table').append(html);
+                        $('#data-ingredients-table').append(html);
                     });
 
                     addPaginationControls(response.ingredients);
@@ -478,6 +484,7 @@
                     fetchData();
                     $(".success_message").show();
                     $(".success_message").text(response.message);
+                    fetchData()
                 }
             })
         })

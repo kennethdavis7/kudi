@@ -64,7 +64,8 @@ class RecipeController extends Controller
             })
             ->groupBy('recipes.id', 'recipes.recipe_name', 'recipes.description', 'recipe_img', 'favorite_recipes.id')
             ->orderBy('missing_quantity', 'asc')
-            ->orderBy('recipes.recipe_name', 'asc');
+            ->orderBy('recipes.recipe_name', 'asc')
+            ->where('recipes.status', 1);
 
         if ($search != "all") {
             $recipes = $recipes->where("recipe_name", "LIKE", "%" . $search . "%");

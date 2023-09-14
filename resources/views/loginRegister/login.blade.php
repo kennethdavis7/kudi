@@ -1,7 +1,15 @@
 @extends("main.index")
 
 @section("body")
-<div class="row d-flex justify-content-center mt-5">
+<div class="row d-flex flex-column align-items-center mt-5">
+    <div class="col-md-6">
+        @if(session()->has("success"))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session("success") }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        @endif
+    </div>
     <div class="col-md-6">
         @if(session()->has("error"))
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -16,10 +24,10 @@
             @csrf
             <div class="mb-3">
                 <label for="emailAddress" class="form-label">Email address</label>
-                <input type="email" class="form-control" id="emailAddress" name="email" placeholder="name@example.com" value={{ old('email') }}>
+                <input type="email" class="form-control {{ $errors->has('email') ? 'is-invalid' : ''}}" id="emailAddress" name="email" placeholder="name@example.com" value="{{ old('email') }}">
                 @error('email')
                 <div class="col-auto">
-                    <span id="passwordHelpInline" class="form-text">
+                    <span class="text-danger">
                         {{ $message }}
                     </span>
                 </div>
@@ -27,10 +35,10 @@
             </div>
             <div class="mb-3">
                 <label for="inputPassword5" class="form-label">Password</label>
-                <input type="password" id="inputPassword5" class="form-control" name="password" aria-describedby="passwordHelpBlock">
+                <input type="password" id="inputPassword5" class="form-control {{ $errors->has('password') ? 'is-invalid' : ''}}" name="password" aria-describedby="passwordHelpBlock">
                 @error('password')
                 <div class="col-auto">
-                    <span id="passwordHelpInline" class="form-text">
+                    <span class="text-danger">
                         {{ $message }}
                     </span>
                 </div>

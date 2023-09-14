@@ -30,14 +30,14 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
-                        <h4 class="card-title mb-4" style="display:flex;">Budget</h5>
+                        <h4 class="card-title mb-4" style="display:flex;">Monthly Budget</h5>
                             <i class="bi bi-pencil-square" data-bs-toggle="modal" data-bs-target="#budget-modal"></i>
                     </div>
                     <h5 class="card-subtitle mb-2 text-secondary" id="budget"></h5>
                 </div>
             </div>
         </div>
-        <h3 class="mt-5">Expense</h3>
+        <h3 class="mt-5">Expenses</h3>
 
         <div class="row">
             <div class="col-md-12" style="position: relative; min-height: 24rem;">
