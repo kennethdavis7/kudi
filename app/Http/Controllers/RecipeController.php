@@ -169,6 +169,10 @@ class RecipeController extends Controller
             $variant->save();
         }
 
+        // Add recipe to user history
+        $recipe = Recipe::find($id);
+        $recipe->userHistories()->attach($userId);
+
         return view('dashboard.recipe', [
             'title' => "Recipe",
             'active' => "recipe",

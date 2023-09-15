@@ -28,6 +28,11 @@ class Recipe extends Model
         return $this->hasMany(RecipeStep::class);
     }
 
+    public function userHistories()
+    {
+        return $this->belongsToMany(User::class, "recipe_user_history", "recipe_id", "user_id")->withPivot("id", "comment", "rating", "created_at")->withTimestamps()->orderByPivot('created_at', 'desc');;
+    }
+
     protected static function booted()
     {
         static::deleting(function (Recipe $recipe) {

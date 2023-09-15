@@ -50,15 +50,37 @@
                 </ol>
 
                 <div class="mb-5">
-                    <form action="/recipes/decrease-ingredients-by-recipe/{{ $recipe->id }}" method="POST">
+                    <form action="/recipes/decrease-ingredients-by-recipe/{{ $recipe->id }}" id="useIngredientsForm" method="POST">
                         @csrf
                         @method('PUT')
 
-                        <button type="submit" class="btn btn-secondary mb-5 mt-3 decreaseIngredientsByRecipe" style="width: 100%;">Gunakan bahan dalam penyimpanan</button>
+                        <button type="submit" class="btn btn-secondary mb-5 mt-3 decreaseIngredientsByRecipe" style="width: 100%;" id="submitUseIngredients">Gunakan bahan dalam penyimpanan</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+@endsection
+
+@section('script')
+    <script>
+        const ingredients = {!! $ingredients->toJson() !!}
+
+        $('#submitUseIngredients').on('click', function(e) {
+            e.preventDefault();
+            
+            if(ingredients.some(x => x.missing_quantity > 0)){
+                swal.fire(
+                    'Warning!',
+                    'Kuantitas bahan dalam penyimpanan masih kurang, mohon tambahkan bahan terlebih dahulu!',
+                    'warning'
+                )
+            }
+            else{
+                $(this).hide()
+                $('#useIngredientsForm').submit()
+            }
+        })
+    </script>
 @endsection
