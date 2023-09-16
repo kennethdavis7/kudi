@@ -20,7 +20,7 @@
         </div>
         <div class="col-md-4"></div>
         <div class="col-md-4 text-end">
-            <a href="/user-recipes/create" class="btn btn-secondary add modal-open-btn">Add Recipe</a>
+            <a href="/user-recipes/create" class="btn btn-secondary add"><span>Add Recipe</span></a>
         </div>
         <div class="col-md-12">
             <table id="recipes" class="table w-full mt-4">
@@ -162,6 +162,7 @@
 
                         html += `
                             <td scope="col" class="align-middle">
+                                <a href="/templates/print/${recipe.id}" class="btn btn-secondary print mx-3"><i class="bi bi-printer"></i></a>
                                 <a href="/user-recipes/${recipe.id}/edit" class="btn btn-secondary" style="margin-right:1rem;"><i class="bi bi-pencil-square"></i></a>
                                 <button class="btn btn-secondary" id="delete-recipe" data-id="${recipe.id}" style="margin-right:1rem;"><i class="bi bi-trash"></i></button>
                                 <a href="/recipes/detail/${recipe.id}" class="btn btn-secondary" style="margin-right:1rem;"><i class="bi bi-eye"></i> </a>

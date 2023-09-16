@@ -68,15 +68,18 @@ class UserRecipeController extends Controller
 
         $imagePath = $request->image->store("public/images/recipes");
 
+        $cookTime = ($request->hour * 3600) + ($request->minute * 60) + $request->second;
+
         $userId = auth()->user()->id;
 
-        DB::transaction(function () use ($request, $imagePath, $userId) {
+        DB::transaction(function () use ($request, $imagePath, $userId, $cookTime) {
             $recipe = Recipe::create([
                 "recipe_name" => $request->name,
                 "description" => $request->description,
                 "recipe_img" => $imagePath,
                 "user_id" => $userId,
-                "status" => (int) $request->status
+                "status" => (int) $request->status,
+                "cook_time" => (int) $cookTime
             ]);
 
             foreach ($request->ingredients as $ingredient) {
@@ -155,19 +158,22 @@ class UserRecipeController extends Controller
 
         $userId = auth()->user()->id;
 
+        $cookTime = ($request->hour * 3600) + ($request->minute * 60) + $request->second;
+
         $recipe = Recipe::where('id', $recipeId)
             ->where('user_id', $userId)
             ->first();
 
         if (!$recipe) return response('', 404);
 
-        DB::transaction(function () use ($request, $imagePath, $userId, $recipeId, $recipe) {
+        DB::transaction(function () use ($request, $imagePath, $userId, $recipeId, $recipe, $cookTime) {
             $recipe->update([
                 "recipe_name" => $request->name,
                 "description" => $request->description,
                 "recipe_img" => $imagePath,
                 "user_id" => $userId,
-                "status" => (int) $request->status
+                "status" => (int) $request->status,
+                "cook_time" => (int) $cookTime
             ]);
 
             RecipeIngredient::where('recipe_id', $recipeId)->delete();

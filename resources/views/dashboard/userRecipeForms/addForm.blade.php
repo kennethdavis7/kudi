@@ -30,6 +30,23 @@
                     <label for="description" class="form-label">Description</label>
                     <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
                 </div>
+                <div class="mb-4">
+                    <label for="cook_time" class="form-label">Cook Time</label>
+                    <div class="d-flex justify-content-start">
+                        <div class="d-flex flex-column align-items-center" style="margin-right:0.5rem; width: 4rem;">
+                            <input type="number" class="form-control cook-time" id="hour" value=0 name="hour" required></input>
+                            <label class="text-secondary" for="">Hour</label>
+                        </div>
+                        <div class="d-flex flex-column align-items-center" style="margin-right:0.5rem; width: 4rem;">
+                            <input type="number" class="form-control cook-time" id="minute" value=0 name="minute" required></input>
+                            <label class="text-secondary" for="">Minute</label>
+                        </div>
+                        <div class="d-flex flex-column align-items-center" style="margin-right:0.5rem; width: 4rem;">
+                            <input type="number" class="form-control cook-time" id="second" value=0 name="second" required></input>
+                            <label class="text-secondary" for="">Second</label>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="d-flex justify-content-between mt-3 mb-5">
@@ -55,6 +72,7 @@
     const RECIPE_NAME_KEY = 'add-form-recipe-name';
     const DESCRIPTION_KEY = 'add-form-recipe-description';
     const STATUS_KEY = 'edit-form-recipe-status';
+    const COOK_TIME_KEY = 'edit-form-recipe-time';
 
     let ingredients = [],
         steps = [];
@@ -90,8 +108,41 @@
             localStorage.removeItem(RECIPE_NAME_KEY);
             localStorage.removeItem(DESCRIPTION_KEY);
             localStorage.removeItem(STATUS_KEY);
+            localStorage.removeItem(COOK_TIME_KEY);
 
             hydrateSavedFields();
+        }
+
+        setDuration(false);
+        convertDuration();
+
+        function convertDuration() {
+            let cookTime = localStorage.getItem(COOK_TIME_KEY);
+            if (cookTime % 60 !== 0) {
+                $("#second").val(cookTime)
+                return;
+            }
+
+            cookTime /= 60;
+            if (cookTime % 60 !== 0 || cookTime < 60) {
+                $("#minute").val(cookTime)
+                return;
+            }
+
+            cookTime /= 60;
+            $("#hour").val(cookTime)
+        }
+
+        function setDuration(click) {
+            if (click === false && localStorage.getItem(COOK_TIME_KEY) != 0) {
+                return;
+            }
+
+            const hours = Number.parseInt($("#hour").val(), 10);
+            const minutes = Number.parseInt($("#minute").val(), 10);
+            const second = Number.parseInt($("#second").val(), 10);
+
+            localStorage.setItem(COOK_TIME_KEY, (hours * 3600) + (minutes * 60) + second);
         }
 
         function switchStatus(click) {
@@ -116,6 +167,10 @@
             }
             $('#switchStatus').val(localStorage.getItem(STATUS_KEY));
         }
+
+        $(".cook-time").on('input', function() {
+            setDuration(true)
+        })
 
         $("#switchStatus").on('click', function() {
             switchStatus(true);
@@ -151,14 +206,6 @@
             steps.forEach((step, idx) => {
                 formData.append(`steps[${idx}]`, step);
             });
-
-            /**
-             * Make sure every field is filled (and that they're greater than 0).
-             */
-            for (const [key, value] of formData.entries()) {
-                console.log(key, value, !value);
-                if (!value) return;
-            }
 
             console.log(formData)
 

@@ -31,20 +31,36 @@
                     <label for="description" class="form-label">Description</label>
                     <textarea class="form-control" id="description" name="description" rows="3" required>{{$recipes->description}}</textarea>
                 </div>
-            </div>
-
-            <div class="d-flex justify-content-between mt-3 mb-5">
-                <div class="col-md-6">
-                    <div id="recipeIngredients"></div>
-                    <button class="btn border border-secondary text-secondary w-100 mt-3" id="editIngredient" type="button">Add Ingredient</button>
+                <div class="mb-4">
+                    <label for="cook_time" class="form-label">Cook Time</label>
+                    <div class="d-flex justify-content-start">
+                        <div class="d-flex flex-column align-items-center" style="margin-right:0.5rem; width: 4rem;">
+                            <input type="number" class="form-control" id="hour" value=0 name="hour" required></input>
+                            <label class="text-secondary" for="">Hour</label>
+                        </div>
+                        <div class="d-flex flex-column align-items-center" style="margin-right:0.5rem; width: 4rem;">
+                            <input type="number" class="form-control" id="minute" value=0 name="minute" required></input>
+                            <label class="text-secondary" for="">Minute</label>
+                        </div>
+                        <div class="d-flex flex-column align-items-center" style="margin-right:0.5rem; width: 4rem;">
+                            <input type="number" class="form-control" id="second" value=0 name="second" required></input>
+                            <label class="text-secondary" for="">Second</label>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="col-md-5">
-                    <div id="recipeSteps"></div>
-                    <button class="btn border border-secondary text-secondary w-100 mt-3" id="editStep" type="button">Add Step</button>
+                <div class="d-flex justify-content-between mt-3 mb-5">
+                    <div class="col-md-6">
+                        <div id="recipeIngredients"></div>
+                        <button class="btn border border-secondary text-secondary w-100 mt-3" id="editIngredient" type="button">Add Ingredient</button>
+                    </div>
+
+                    <div class="col-md-5">
+                        <div id="recipeSteps"></div>
+                        <button class="btn border border-secondary text-secondary w-100 mt-3" id="editStep" type="button">Add Step</button>
+                    </div>
                 </div>
             </div>
-        </div>
     </form>
 </div>
 @endsection
@@ -60,38 +76,38 @@
     const editIngredients = <?php echo json_encode($ingredients); ?>;
     const editRecipe = <?php echo json_encode($recipes); ?>;
 
-    let ingredients = [],
-        steps = [];
-    hydrateSavedFields();
+    console.log(editSteps, editIngredients);
 
-    function hydrateSavedFields() {
-        ingredients = JSON.parse(localStorage.getItem(INGREDIENTS_KEY)) || editIngredients.map((ingredient) => {
-            return {
-                typeId: ingredient.ingredient_types_id,
-                qty: ingredient.qty,
-                unitId: ingredient.unit_id,
-            }
-        });
-
-        steps = JSON.parse(localStorage.getItem(STEPS_KEY)) || editSteps.map((step) => {
-            return step.name;
-        })
-    }
+    let ingredients = editIngredients.map((ingredient) => ({
+            typeId: ingredient.ingredient_types_id,
+            unitId: ingredient.unit_id,
+            qty: ingredient.qty,
+        })),
+        steps = editSteps.map((step) => step.name);
 
     /**
      * -- Base.
      */
     $(document).ready(function() {
         switchStatus(false);
+        convertDuration();
 
-        function clearSavedFields() {
-            localStorage.removeItem(INGREDIENTS_KEY);
-            localStorage.removeItem(STEPS_KEY);
-            localStorage.removeItem(RECIPE_NAME_KEY);
-            localStorage.removeItem(DESCRIPTION_KEY);
-            localStorage.removeItem(STATUS_KEY);
+        function convertDuration() {
+            let cookTime = editRecipe.cook_time;
+            if (cookTime % 60 !== 0) {
 
-            hydrateSavedFields();
+                $("#second").val(cookTime)
+                return;
+            }
+
+            cookTime /= 60;
+            if (cookTime % 60 !== 0 || cookTime < 60) {
+                $("#minute").val(cookTime)
+                return;
+            }
+
+            cookTime /= 60;
+            $("#hour").val(cookTime)
         }
 
         function switchStatus(click) {
@@ -119,10 +135,6 @@
 
         $("#switchStatus").on('click', function() {
             switchStatus(true);
-        })
-
-        $(".refreshStorage").on('click', function() {
-            clearSavedFields();
         })
 
         /**
@@ -158,14 +170,6 @@
                 formData.append(`steps[${idx}]`, step);
             });
 
-            /**
-             * Make sure every field is filled (and that they're greater than 0).
-             */
-            for (const [key, value] of formData.entries()) {
-                console.log(key, value, !value);
-                if (!value) return;
-            }
-
             $.ajax({
                 method: 'POST',
                 url: `/user-recipes/${editRecipe.id}`,
@@ -174,8 +178,6 @@
                 processData: false,
                 success(_1, _2, xhr) {
                     if (xhr.status !== 204) return;
-
-                    clearSavedFields();
                     window.location = '/user-recipes';
                 }
             });
@@ -186,24 +188,8 @@
      * -- Recipe details.
      */
     $(document).ready(function() {
-
-        if (localStorage.getItem(RECIPE_NAME_KEY) === null && localStorage.getItem(DESCRIPTION_KEY) === null) {
-            localStorage.setItem(RECIPE_NAME_KEY, editRecipe.recipe_name);
-            localStorage.setItem(DESCRIPTION_KEY, editRecipe.description);
-        }
-
-        $('#recipeName').val(localStorage.getItem(RECIPE_NAME_KEY));
-        $('#description').val(localStorage.getItem(DESCRIPTION_KEY));
-
-        $(document).on('input', '#recipeName', function() {
-            const value = $(this).val();
-            localStorage.setItem(RECIPE_NAME_KEY, value);
-        });
-
-        $(document).on('input', '#description', function() {
-            const value = $(this).val();
-            localStorage.setItem(DESCRIPTION_KEY, value);
-        });
+        $('#recipeName').val(editRecipe.recipe_name);
+        $('#description').val(editRecipe.description);
     });
 
     /**
@@ -215,16 +201,11 @@
 
         function editInputStep() {
             steps.push('');
-            saveAndRefreshSteps();
+            renderInputSteps();
         }
 
         function removeInputStep(index) {
             steps.splice(index, 1);
-            saveAndRefreshSteps();
-        }
-
-        function saveAndRefreshSteps() {
-            saveInputSteps();
             renderInputSteps();
         }
 
@@ -259,10 +240,6 @@
             }
         }
 
-        function saveInputSteps() {
-            localStorage.setItem(STEPS_KEY, JSON.stringify(steps));
-        }
-
         $(document).on('click', '#editStep', editInputStep);
 
         $(document).on('click', '.delete-step', function() {
@@ -275,7 +252,6 @@
             const value = $(this).val();
 
             steps[index] = value;
-            saveInputSteps();
         });
     });
 
@@ -304,7 +280,6 @@
         }
 
         function saveAndRefreshIngredients() {
-            saveInputIngredients();
             renderInputIngredients();
             fetchUnitsForAll();
         }
@@ -389,13 +364,8 @@
             $(`#ingredients-list-${index}`).html(html);
         }
 
-        function saveInputIngredients() {
-            localStorage.setItem(INGREDIENTS_KEY, JSON.stringify(ingredients));
-        }
-
         function updateIngredient(ingredientIndex, property, value) {
             ingredients[ingredientIndex][property] = value;
-            saveInputIngredients();
         }
 
         $(document).on('click', '#editIngredient', function() {

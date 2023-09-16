@@ -172,6 +172,7 @@
 
                         html += `
                                     </div>
+                                <div class="mb-2" style="color:grey;"><i class="bi bi-clock" style="margin-right:0.5rem;"></i>Perkiraan ${moment.duration(recipe.cook_time, 's').humanize()}</div>
                     `;
 
                         console.log(recipe.recipe_name, recipe.missing_quantity);

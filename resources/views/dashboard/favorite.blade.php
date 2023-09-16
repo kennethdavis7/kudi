@@ -170,6 +170,7 @@
 
                         html += `
                             </div>
+                            <div class="mb-2" style="color:grey;"><i class="bi bi-clock" style="margin-right:0.5rem;"></i>Approximately ${moment.duration(recipe.cook_time, 's').humanize()}</div>
                         `;
 
                         if (recipe.missing_quantity > 0) {

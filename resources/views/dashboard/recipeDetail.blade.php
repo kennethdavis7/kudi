@@ -12,7 +12,8 @@
                 <img src="{{ asset('storage/' . $recipe->recipe_img) }}" style="width: 100%; height: 20rem; object-fit: cover;" class="w-100" alt="Fried Rice">
             </div>
 
-            <div style="max-height: 100%;">
+            <div style="max-height: 100%; margin-top: 1rem;">
+                <i class="bi bi-clock"><span id="cook-time" style="font-size: 15px;"></span></i>
                 <h3 class="mt-4">Description</h3>
                 <hr>
                 <p>{{$recipe->description}}</p>
@@ -91,5 +92,27 @@
             $('#useIngredientsForm').submit()
         }
     })
+</script>
+
+<script>
+    convertDuration();
+
+    function convertDuration() {
+        let cookTime = <?php echo $recipe->cook_time ?>;
+        if (cookTime % 60 !== 0) {
+
+            $("#cook-time").text(" Perkiraan waktu memasak : " + cookTime + " seconds")
+            return;
+        }
+
+        cookTime /= 60;
+        if (cookTime % 60 !== 0 || cookTime < 60) {
+            $("#cook-time").text(" Perkiraan waktu memasak : " + cookTime + " minutes")
+            return;
+        }
+
+        cookTime /= 60;
+        $("#cook-time").text(" Perkiraan waktu memasak : " + cookTime + " hours")
+    }
 </script>
 @endsection

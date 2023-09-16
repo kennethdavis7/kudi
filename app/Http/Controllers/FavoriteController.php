@@ -30,6 +30,7 @@ class FavoriteController extends Controller
             'recipes.recipe_name',
             'recipes.description',
             'recipes.recipe_img',
+            'recipes.cook_time',
             DB::raw('SUM(GREATEST(
                 0, (recipe_ingredients.qty * units.value) - COALESCE(iv.total_current_qty, 0))
             ) missing_quantity'),
@@ -59,7 +60,7 @@ class FavoriteController extends Controller
                 $join->on('favorite_recipes.recipe_id', '=', 'recipes.id');
                 $join->on('favorite_recipes.user_id', '=', DB::raw("'$userId'"));
             })
-            ->groupBy('recipes.id', 'recipes.recipe_name', 'recipes.description', 'recipe_img', 'favorite_recipes.id')
+            ->groupBy('recipes.id', 'recipes.recipe_name', 'recipes.description', 'recipe_img', 'favorite_recipes.id', 'recipes.cook_time')
             ->orderBy('missing_quantity', 'asc')
             ->orderBy('recipes.recipe_name', 'asc')
             ->where('favorite_recipes.user_id', '=', auth()->user()->id);

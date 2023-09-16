@@ -33,6 +33,7 @@ class RecipeController extends Controller
             'recipes.recipe_name',
             'recipes.description',
             'recipes.recipe_img',
+            'recipes.cook_time',
             DB::raw('SUM(GREATEST(
                 0, (recipe_ingredients.qty * units.value) - COALESCE(iv.total_current_qty, 0))
             ) missing_quantity'),
@@ -62,7 +63,7 @@ class RecipeController extends Controller
                 $join->on('favorite_recipes.recipe_id', '=', 'recipes.id');
                 $join->on('favorite_recipes.user_id', '=', DB::raw("'$userId'"));
             })
-            ->groupBy('recipes.id', 'recipes.recipe_name', 'recipes.description', 'recipe_img', 'favorite_recipes.id')
+            ->groupBy('recipes.id', 'recipes.recipe_name', 'recipes.description', 'recipe_img', 'favorite_recipes.id', 'recipes.cook_time')
             ->orderBy('missing_quantity', 'asc')
             ->orderBy('recipes.recipe_name', 'asc')
             ->where('recipes.status', 1);
@@ -94,6 +95,7 @@ class RecipeController extends Controller
             'recipe_ingredients.qty',
             'units.abbreviation AS unit',
             'recipes.recipe_img',
+            'recipes.cook_time',
             DB::raw('GREATEST(
                 0, (
                     recipe_ingredients.qty - (CAST(COALESCE(iv.total_current_qty, 0) AS DECIMAL(12, 2)) / CAST(units.value AS DECIMAL(12, 2)))
@@ -122,7 +124,7 @@ class RecipeController extends Controller
                 }
             )
             ->leftJoin('units', 'units.id', '=', 'recipe_ingredients.unit_id')
-            ->groupBy('ingredient_types.type', 'recipe_ingredients.qty', 'recipes.recipe_img', 'units.value', 'units.abbreviation', 'iv.total_current_qty')
+            ->groupBy('ingredient_types.type', 'recipe_ingredients.qty', 'recipes.recipe_img', 'units.value', 'units.abbreviation', 'iv.total_current_qty', 'recipes.cook_time')
             ->where('recipes.id', '=', $id)
             ->get();
 

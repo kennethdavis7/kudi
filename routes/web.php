@@ -6,6 +6,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\IngredientController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PrintController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\HistoryController;
@@ -69,6 +70,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::controller(FavoriteController::class)->group(function () {
         Route::get('/favorites/fetchData/{search}', 'fetchData');
+    });
+
+    Route::controller(PrintController::class)->group(function () {
+        Route::get('/templates/print/{recipe}', 'index');
     });
 
     Route::controller(UserRecipeController::class)->group(function () {
