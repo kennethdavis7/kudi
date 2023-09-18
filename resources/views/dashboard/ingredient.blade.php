@@ -520,13 +520,6 @@
             })
         })
 
-        $(document).on('click', '.modal-open-btn', function(e) {
-            const id = $('#ingredient')?.val();
-            if (id === undefined) return;
-
-            fetchUnits(id, '#unit');
-        })
-
         $(document).on('change', '#ingredient', function(e) {
             const shownVal = $("#ingredient").val();
             const id = $("#ingredients option[value='" + shownVal + "']").data("value");
