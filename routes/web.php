@@ -8,6 +8,7 @@ use App\Http\Controllers\IngredientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\UserRecipeController;
 
 /*
@@ -42,6 +43,7 @@ Route::middleware(['auth'])->group(function() {
     Route::resource('/ingredients', IngredientController::class);
     Route::resource('/user-recipes', UserRecipeController::class);
     Route::resource('/recipes', RecipeController::class);
+    Route::resource('/histories', HistoryController::class)->except('show', 'create', 'store', 'edit', 'update', 'destroy');
     Route::resource('/favorites', FavoriteController::class);
 
     Route::controller(IngredientController::class)->group(function() {
@@ -57,6 +59,11 @@ Route::middleware(['auth'])->group(function() {
         Route::get('/recipes/detail/{id}', 'detail');
         Route::get('/recipes/fetchData/{search}', 'fetchData');
         Route::put('/recipes/decrease-ingredients-by-recipe/{id}', 'decreaseIngredientsByRecipe');
+    });
+
+    Route::controller(HistoryController::class)->group(function() {
+        Route::get('/histories/fetchData/{filter}', 'fetchData');
+        Route::patch('/histories/addRatingExperience/{history}', 'updateHistory');
     });
 
     Route::controller(BudgetController::class)->group(function() {

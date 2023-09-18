@@ -59,4 +59,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Favorite::class);
     }
+
+    public function recipeHistories()
+    {
+        return $this->belongsToMany(Recipe::class, "recipe_user_history", "user_id", "recipe_id")->withPivot("id", "comment", "rating", "created_at")->withTimestamps()->orderByPivot('created_at', 'desc');
+    }
 }

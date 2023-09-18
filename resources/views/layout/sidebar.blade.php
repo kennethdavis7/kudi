@@ -23,6 +23,12 @@
       </a>
     </li>
     <li>
+      <a href="/histories" class="nav-link link-body-emphasis d-flex align-items-center  {{$active == 'history' ? 'active-sd' : ''}}">
+        <img src="{{asset('img/history.png')}}" width="20px" style="margin-right: 0.75rem;" alt="">
+        Histories
+      </a>
+    </li>
+    <li>
       <a href="/favorites" class="nav-link link-body-emphasis d-flex align-items-center  {{$active == 'favorite' ? 'active-sd' : ''}}">
         <img src="{{asset('img/heart-black.png')}}" width="20px" style="margin-right: 0.75rem;" alt="">
         Favourites
