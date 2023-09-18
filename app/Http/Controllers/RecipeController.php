@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\FavoriteRecipes;
 use App\Models\IngredientVariants;
 use App\Models\Recipe;
 use App\Models\RecipeIngredient;
-use App\Models\IngredientTypes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -27,7 +25,6 @@ class RecipeController extends Controller
     {
         $userId = auth()->user()->id;
 
-
         $recipes = RecipeIngredient::select(
             'recipes.id',
             'recipes.recipe_name',
@@ -44,11 +41,9 @@ class RecipeController extends Controller
                 DB::raw("
                 (SELECT
                     ingredient_variants.ingredient_types_id,
-                    SUM(current_qty * units.value) AS total_current_qty
+                    SUM(current_qty) AS total_current_qty
                 FROM
                     ingredient_variants
-                LEFT JOIN
-                    units ON units.id = ingredient_variants.unit_id
                 WHERE
                     user_id = $userId
                 GROUP BY
@@ -103,17 +98,14 @@ class RecipeController extends Controller
             ) missing_quantity'),
         )
             ->leftJoin('recipes', 'recipes.id', '=', 'recipe_ingredients.recipe_id')
-            ->leftJoin('user_ingredients', 'user_ingredients.ingredient_types_id', '=', 'recipe_ingredients.ingredient_types_id')
             ->leftJoin('ingredient_types', 'ingredient_types.id', '=', 'recipe_ingredients.ingredient_types_id')
             ->leftJoin(
                 DB::raw("(
                 SELECT
                     ingredient_types_id,
-                    SUM(current_qty * units.value) AS total_current_qty
+                    SUM(current_qty) AS total_current_qty
                 FROM
                     ingredient_variants
-                LEFT JOIN
-                    units ON units.id = ingredient_variants.unit_id
                 WHERE
                     user_id=$userId
                 GROUP BY
@@ -145,9 +137,7 @@ class RecipeController extends Controller
             ->leftJoin('units', 'units.id', '=', 'recipe_ingredients.unit_id')
             ->get();
 
-        $variants = IngredientVariants::select('ingredient_variants.*', 'units.value')
-            ->where('user_id', $userId)
-            ->leftJoin('units', 'units.id', '=', 'ingredient_variants.unit_id')
+        $variants = IngredientVariants::where('user_id', $userId)
             ->orderBy('ingredient_types_id', 'desc')
             ->get();
 
@@ -163,10 +153,10 @@ class RecipeController extends Controller
 
             if ($ingredient === null) continue;
 
-            $oldQuantity = $variant->current_qty * $variant->value;
+            $oldQuantity = $variant->current_qty;
             $newQuantity = max(0, $oldQuantity - $ingredient->qty);
 
-            $variant->current_qty = $newQuantity / $variant->value;
+            $variant->current_qty = $newQuantity;
             $ingredient->qty -= $oldQuantity - $newQuantity;
 
             $variant->save();

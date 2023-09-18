@@ -9,11 +9,15 @@
             <div>
                 <h1>{{ $recipe->recipe_name }}</h1>
                 <hr>
-                <img src="{{ asset('storage/' . $recipe->recipe_img) }}" style="width: 100%; height: 20rem; object-fit: cover;" class="w-100" alt="Fried Rice">
+                <img src="{{ asset('storage/' . $recipe->recipe_img) }}" style="width: 100%; height: 20rem; object-fit: cover;" class="w-100" alt="">
             </div>
 
             <div style="max-height: 100%; margin-top: 1rem;">
-                <i class="bi bi-clock"><span id="cook-time" style="font-size: 15px;"></span></i>
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-clock"></i>
+                    <span id="cook-time" style="font-size: 15px;"></span>
+                </div>
+
                 <h3 class="mt-4">Description</h3>
                 <hr>
                 <p>{{$recipe->description}}</p>
@@ -24,7 +28,7 @@
                     @foreach($ingredients as $ingredient)
                     <li class="list-group-item d-flex justify-content-between align-items-start">
                         @if($ingredient->missing_quantity > 0)
-                        <span class="text-danger">{{ $ingredient->type }} (missing {{ number_format($ingredient->missing_quantity, 1, ',', '.') }} {{ $ingredient->unit }})</span>
+                        <span class="text-danger">{{ $ingredient->type }} (kurang {{ number_format($ingredient->missing_quantity, 1, ',', '.') }} {{ $ingredient->unit }})</span>
                         <span class="badge bg-danger d-flex align-middle rounded-pill">{{ $ingredient->qty }} {{ $ingredient->unit }}</span>
                         @else
                         <span>{{ $ingredient->type }}</span>
@@ -95,24 +99,9 @@
 </script>
 
 <script>
-    convertDuration();
+    const cookTime = <?php echo $recipe->cook_time ?>;
+    const duration = convertDuration(cookTime);
 
-    function convertDuration() {
-        let cookTime = <?php echo $recipe->cook_time ?>;
-        if (cookTime % 60 !== 0) {
-
-            $("#cook-time").text(" Perkiraan waktu memasak : " + cookTime + " seconds")
-            return;
-        }
-
-        cookTime /= 60;
-        if (cookTime % 60 !== 0 || cookTime < 60) {
-            $("#cook-time").text(" Perkiraan waktu memasak : " + cookTime + " minutes")
-            return;
-        }
-
-        cookTime /= 60;
-        $("#cook-time").text(" Perkiraan waktu memasak : " + cookTime + " hours")
-    }
+    $('#cook-time').text(`Perkiraan waktu masak: ${duration}`);
 </script>
 @endsection

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Unit;
 use App\Models\UserIngredients;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
@@ -42,20 +43,33 @@ class IngredientController extends Controller
         $userAuth = auth()->user();
         $user = User::where('name', '=', $userAuth->name)->first();
 
-        if ($request->has('data')) {
-            $ingredients = $user->ingredientTypes()->filter($request->data);
-        } else {
-            $ingredients = $user->ingredientTypes()->filter($search);
-        }
-
         $condition = function ($query) use ($userAuth) {
             $query->where('current_qty', '>', 0)->where('user_id', $userAuth->id);
         };
 
-        $ingredients = $ingredients->whereHas('ingredientVariants', $condition)->with([
-            'ingredientVariants' => $condition,
-            'ingredientVariants.unit',
-        ])->paginate(5);
+        $ingredients = $user
+            ->ingredientTypes()
+            ->filter($search)
+            ->whereHas('ingredientVariants', $condition)
+            ->with([
+                'ingredientVariants' => $condition,
+            ])
+            ->paginate(5);
+
+        $units = Unit::orderBy('unit_category_id', 'asc')
+            ->orderBy('value', 'asc')
+            ->get()
+            ->groupBy('unit_category_id');
+
+        $ingredients->each(function($ingredient) use ($units) {
+            $ingredient->ingredientVariants->map(function ($variant) use ($ingredient, $units) {
+                $ingredientUnits = $units[$ingredient->unit_category_id];
+                $result = $this->getDisplayQty($variant, $ingredientUnits);
+
+                $variant['qty'] = $result['qty'];
+                $variant['unit'] = $result['unit'];
+            });
+        });
 
         return response()->json([
             "ingredients" => $ingredients,
@@ -80,18 +94,28 @@ class IngredientController extends Controller
 
     public function decrease(int $id, Request $request)
     {
-        $ingredient = IngredientVariants::find($id);
-        $validator = Validator::make($request->all(), [
-            'decrease' => 'required'
+        $request->validate([
+            'decrease' => 'required',
+            'unit_id' => 'required|exists:units,id',
         ]);
 
-        $qtyDecrease =  $validator->validated();
+        $variant = IngredientVariants::find($id);
 
-        $ingredient->current_qty = max(0, $ingredient->current_qty - $qtyDecrease['decrease']);
-        $ingredient->save();
+        $unit = Unit::find($request['unit_id']);
+        $ingredientUnits = Unit::where('unit_category_id', '=', $variant->ingredientTypes->unit_category_id)->get();
+
+        $newQty = $variant->current_qty - $request['decrease'] * $unit->value;
+
+        $variant->current_qty = max(0, $newQty);
+        $variant->save();
+
+        $result = $this->getDisplayQty($variant, $ingredientUnits);
+
+        $variant['qty'] = $result['qty'];
+        $variant['unit'] = $result['unit'];
 
         return response()->json([
-            "ingredient" => $ingredient,
+            "ingredient" => $variant,
         ], 200);
     }
 
@@ -124,26 +148,30 @@ class IngredientController extends Controller
         $userId = auth()->user()->id;
         $data = $validator->validated();
 
-        $ingredientTypeId = $data['ingredient'];
-        $unit = $data["unit_id"];
-        $qty = $data['qty'];
-        $price = $data['price'];
+        DB::transaction(function() use ($userId, $data) {
+            $ingredientTypeId = $data['ingredient'];
+            $qty = $data['qty'];
+            $price = $data['price'];
 
-        if (UserIngredients::where('user_id', '=', $userId)->where('ingredient_types_id', '=', $ingredientTypeId)->doesntExist()) {
-            UserIngredients::create([
+            $unit = Unit::find($data["unit_id"]);
+            $qtyValue = $qty * $unit->value;
+
+            if (UserIngredients::where('user_id', '=', $userId)->where('ingredient_types_id', '=', $ingredientTypeId)->doesntExist()) {
+                UserIngredients::create([
+                    'user_id' => $userId,
+                    'ingredient_types_id' => $ingredientTypeId,
+                ]);
+            }
+
+            IngredientVariants::create([
                 'user_id' => $userId,
                 'ingredient_types_id' => $ingredientTypeId,
+                'initial_qty' => $qtyValue,
+                'current_qty' => $qtyValue,
+                'buy_price' => $price,
             ]);
-        }
+        });
 
-        IngredientVariants::create([
-            'user_id' => $userId,
-            'ingredient_types_id' => $ingredientTypeId,
-            'initial_qty' => $qty,
-            'current_qty' => $qty,
-            'buy_price' => $price,
-            'unit_id' => $unit,
-        ]);
 
         return response()->json([
             'success' => 'Ingredient has been added'
@@ -172,19 +200,11 @@ class IngredientController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request)
+    public function update(Request $request, IngredientVariants $variant)
     {
         $validator = Validator::make($request->all(), [
-            "buy_price" => "required",
+            'buy_price' => 'required',
         ]);
-
-        $data = $validator->validated();
-        $currentQty = $request->current_qty;
-        $initialQtyObject = IngredientVariants::where("id", $request->ingredient_variants_id)->select("initial_qty")->first();
-
-        if ($currentQty > $initialQtyObject->initial_qty) {
-            $data["initial_qty"] = $currentQty;
-        }
 
         if ($validator->fails()) {
             return response()->json([
@@ -192,7 +212,8 @@ class IngredientController extends Controller
             ], 400);
         }
 
-        IngredientVariants::where("id", $request->ingredient_variants_id)->update($data);
+        $data = $validator->validated();
+        $variant['buy_price'] = $data['buy_price'];
 
         return response()->json([
             "success" => "Ingredient has been edited",
@@ -222,5 +243,20 @@ class IngredientController extends Controller
         return response()->json([
             "message" => "Ingredient has been deleted"
         ], 200);
+    }
+
+    private function getDisplayQty(IngredientVariants $variant, Collection $units)
+    {
+        foreach ($units as $unit) {
+            $qty = $variant->current_qty / $unit->value;
+            $unit = $unit->abbreviation;
+
+            if ($qty <= 1000) break;
+        }
+
+        return [
+            'qty' => $qty,
+            'unit' => $unit,
+        ];
     }
 }

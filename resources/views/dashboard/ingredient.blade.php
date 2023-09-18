@@ -242,7 +242,7 @@
             });
         }
 
-        function fetchUnits(ingredientTypeId) {
+        function fetchUnits(ingredientTypeId, elementSelector) {
             const data = {
                 'type': $('#ingredient').val(),
             };
@@ -253,10 +253,10 @@
                 type: "GET",
                 url,
                 success: function(response) {
-                    $("#unit").html("");
+                    $(elementSelector).html("");
+
                     $.each(response.units, function(i, item) {
-                        $("#unit").append(`<option value="${item.id}">${item.name}</option>`);
-                        $("#unitDecrease").append(`<option value="${item.id}">${item.name}</option>`);
+                        $(elementSelector).append(`<option value="${item.id}">${item.name}</option>`);
                     })
                 }
             })
@@ -266,6 +266,10 @@
             style: 'currency',
             currency: 'IDR',
         });
+
+        function getDisplayQty(qty, unit) {
+           return `${Math.round(qty * 10) / 10} ${unit}`;
+        }
 
         function fetchData() {
             const rawSearchQuery = $('.search').val();
@@ -323,14 +327,13 @@
 
                         for (let j = 0; j < item.ingredient_variants.length; j++) {
                             const variant = item.ingredient_variants[j];
-                            console.log(variant.ingredient_types_id);
+
                             html += `
                                 <tr id=row-${variant.id}>
                                     <th scope="row" class="text-center align-middle">${j + 1}</th>
                                     <td class="text-center align-middle" id="buy-price-${variant.id}">${moneyFormatter.format(variant.buy_price)}</td>
-                                    <td class="text-center align-middle">
-                                        <span id="current-qty-${variant.id}">${variant.current_qty}</span>
-                                        ${variant.unit.abbreviation}
+                                    <td class="text-center align-middle" id="qty-${variant.id}">
+                                        ${getDisplayQty(variant.qty, variant.unit)}
                                     </td>
                                     <td class="text-center align-middle" id="duration-kept-${variant.id}">${moment(variant.created_at).fromNow(true)}</td>
                                     <td class="d-flex justify-content-center align-middle">
@@ -363,16 +366,19 @@
 
             const ingredientId = $(this).data("ingredient-id");
             const ingredientTypesId = $(this).data("types-id");
-            console.log(ingredientTypesId);
-            fetchUnits(ingredientTypesId);
+
+            fetchUnits(ingredientTypesId, '#unitDecrease');
             $("#decrease-id").val(ingredientId);
         })
 
         $(document).on("submit", "#decrease form", function(e) {
             e.preventDefault();
+
             const ingredientId = $("#decrease-id").val();
+
             const data = {
-                'decrease': $("#qty-decrease").val()
+                'decrease': $("#qty-decrease").val(),
+                'unit_id': $("#unitDecrease").val(),
             }
 
             $.ajaxSetup({
@@ -388,14 +394,15 @@
                 data: data,
                 success: function(response) {
                     const {
-                        current_qty,
+                        qty,
+                        unit,
                         id,
                     } = response.ingredient;
 
-                    if (current_qty === 0) {
+                    if (qty === 0) {
                         $(`#row-${id}`).remove();
                     } else {
-                        $(`#current-qty-${id}`).text(current_qty);
+                        $(`#qty-${id}`).text(getDisplayQty(qty, unit));
                     }
 
                     $("#decrease").modal("hide");
@@ -425,7 +432,7 @@
 
         })
 
-        $(document).on("click", ".edit-button", function(e) {
+        $(document).on("submit", "#editVariants", function(e) {
             e.preventDefault();
 
             const data = {
@@ -453,7 +460,6 @@
                         $(".modal").find("input").val("");
 
                         $(`#buy-price-${response.id}`).text(moneyFormatter.format(response.data.buy_price));
-                        $(`#current-qty-${response.id}`).text(response.data.current_qty);
                     } else {
                         for (const key in response.errors) {
                             if (key === "ingredient") {
@@ -518,13 +524,13 @@
             const id = $('#ingredient')?.val();
             if (id === undefined) return;
 
-            fetchUnits(id);
+            fetchUnits(id, '#unit');
         })
 
         $(document).on('change', '#ingredient', function(e) {
             const shownVal = $("#ingredient").val();
             const id = $("#ingredients option[value='" + shownVal + "']").data("value");
-            fetchUnits(id);
+            fetchUnits(id, '#unit');
         });
 
         $(document).on('submit', '#create form', function(e) {
