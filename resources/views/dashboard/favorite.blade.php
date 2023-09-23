@@ -181,8 +181,6 @@
 
                         html += `
                             </div>
-                            <span class="badge bg-success mb-2">Halal</span>
-                            <span class="badge bg-danger mb-2">Pedas</span>
                             <div class="mb-2" style="color:grey;"><i class="bi bi-clock" style="margin-right:0.5rem;"></i>Perkiraan ${moment.duration(recipe.cook_time, 's').humanize()}</div>
                         `;
 

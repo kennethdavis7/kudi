@@ -23,26 +23,26 @@ class HistoryController extends Controller
     public function fetchData($filter = 'all')
     {
         $userId = auth()->user()->id;
-        $recipes = User::find($userId)->recipeHistories()->when($filter != 'all', function ($recipe) use ($filter){
-            switch($filter){
+        $recipes = User::find($userId)->recipeHistories()->when($filter != 'all', function ($recipe) use ($filter) {
+            switch ($filter) {
                 case 'day': {
-                    return $recipe->where('recipe_user_history.created_at', '>=', Carbon::now()->subDay());
-                }
+                        return $recipe->where('recipe_user_history.created_at', '>=', Carbon::now()->tz('Asia/Jakarta')->subDay());
+                    }
                 case 'days': {
-                    return $recipe->where('recipe_user_history.created_at', '>=', Carbon::now()->subDays(3));
-                }
+                        return $recipe->where('recipe_user_history.created_at', '>=', Carbon::now()->tz('Asia/Jakarta')->subDays(3));
+                    }
                 case 'week': {
-                    return $recipe->where('recipe_user_history.created_at', '>=', Carbon::now()->subWeek());
-                }
+                        return $recipe->where('recipe_user_history.created_at', '>=', Carbon::now()->tz('Asia/Jakarta')->subWeek());
+                    }
                 case 'month': {
-                    return $recipe->where('recipe_user_history.created_at', '>=', Carbon::now()->subMonth());
-                }
+                        return $recipe->where('recipe_user_history.created_at', '>=', Carbon::now()->tz('Asia/Jakarta')->subMonth());
+                    }
                 case 'year': {
-                    return $recipe->where('recipe_user_history.created_at', '>=', Carbon::now()->subyear());
-                }
+                        return $recipe->where('recipe_user_history.created_at', '>=', Carbon::now()->tz('Asia/Jakarta')->subyear());
+                    }
                 default: {
-                    return true;
-                }
+                        return true;
+                    }
             }
         })->paginate(10);
 
@@ -53,7 +53,8 @@ class HistoryController extends Controller
         ], 200);
     }
 
-    public function updateHistory(Request $request, $history){
+    public function updateHistory(Request $request, $history)
+    {
         $history = RecipeUserHistory::find($history);
 
         $rating = $request->rating == '' ? null : $request->rating;

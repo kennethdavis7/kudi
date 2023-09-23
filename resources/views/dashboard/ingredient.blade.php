@@ -268,7 +268,7 @@
         });
 
         function getDisplayQty(qty, unit) {
-           return `${Math.round(qty * 10) / 10} ${unit}`;
+            return `${Math.round(qty * 10) / 10} ${unit}`;
         }
 
         function fetchData() {

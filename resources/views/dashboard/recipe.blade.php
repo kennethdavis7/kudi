@@ -40,10 +40,7 @@
                         Filter Tags
                     </a>
 
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                        <li><a class="dropdown-item" href="#">Action</a></li>
-                        <li><a class="dropdown-item" href="#">Another action</a></li>
-                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    <ul class="dropdown-menu" id="filter-tags" aria-labelledby="dropdownMenuLink">
                     </ul>
                 </div>
             </div>
@@ -53,6 +50,7 @@
     <div class="row mt-5 mb-0 mx-3">
         <div id="recipes" class="gap-4"></div>
     </div>
+
 
     <div class="container-pagination d-flex justify-content-end mt-5" style="margin-right:1.5rem;">
         <nav aria-label="...">
@@ -66,6 +64,11 @@
 @section("script")
 <script>
     $(document).ready(function() {
+        $('.js-example-basic-multiple').select2();
+        $('ul.dropdown-menu').on('click', function(event) {
+            event.stopPropagation();
+        });
+
         let currentPage = 1;
         let totalPages = 1;
 
@@ -143,10 +146,17 @@
         function fetchData() {
             const rawSearchQuery = $('.search').val();
             const search = rawSearchQuery.trim().length === 0 ? 'all' : rawSearchQuery;
+            console.log("tes")
+
+            console.log($('#input-tag-1').val());
+
+            for (const inputTag of $('.input-tag')) {
+                console.log(inputTag)
+            }
 
             $.ajax({
                 type: "GET",
-                url: `/recipes/fetchData/${search}/?page=${currentPage}`,
+                url: `/recipes/fetchData/${search}/?page=${currentPage}&tag`,
                 dataType: "json",
                 success: function(response) {
                     let html = '';
@@ -160,7 +170,9 @@
 
                     $("#recipes").removeClass("d-flex justify-content-center");
                     $(".container-pagination").removeClass("d-none");
+                    console.log(response);
                     $.each(response.recipes.data, function(i, recipe) {
+                        $("#filter-tags").html("");
                         html += `
                             <div class="card h-100 d-flex flex-column justify-content-between">
                                 <div>
@@ -184,19 +196,25 @@
 
                         html += `
                                     </div>
-<<<<<<< HEAD
-                                <div class="mb-2 text-muted d-flex align-items-center gap-2">
-                                    <i class="bi bi-clock"></i>
-                                    <span>${convertDuration(recipe.cook_time)}</span>
-                                </div>
-=======
-                                <span class="badge bg-success mb-2">Halal</span>
-                                <span class="badge bg-danger mb-2">Pedas</span>
-                                <div class="mb-2" style="color:grey;"><i class="bi bi-clock" style="margin-right:0.5rem;"></i>Perkiraan ${moment.duration(recipe.cook_time, 's').humanize()}</div>
->>>>>>> 98fdc13 (add filter tag)
-                    `;
+                            `;
 
-                        console.log(recipe.recipe_name, recipe.missing_quantity);
+                        for (const tag of response.tags) {
+                            if (tag.recipe_name === recipe.recipe_name) {
+                                html += `
+                                    <span class="badge text-bg-${tag.color}">${tag.tag}</span>
+                                `;
+                            }
+                            $("#filter-tags").append(`
+                                <li><a class="dropdown-item" href="#"><input type="checkbox" class="input-tag" id="input-tag-${tag.id}" value="${tag.id}" style="margin-right: 10px;" />${tag.tag}</a></li>
+                            `);
+                        }
+
+                        html += `
+                            <div class="my-2 text-muted d-flex align-items-center gap-2">
+                                <i class="bi bi-clock"></i>
+                                <span>${convertDuration(recipe.cook_time)}</span>
+                            </div>
+                        `;
 
                         if (recipe.missing_quantity > 0) {
                             html += `
@@ -229,6 +247,8 @@
         }
 
         $(document).on("input", ".search", () => goToPage(1));
+
+        $(document).on("click", ".input-tag", () => goToPage(1));
 
         $(document).on("click", ".favorite-black", function() {
             const recipeId = {

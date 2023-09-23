@@ -41,13 +41,11 @@ class FavoriteController extends Controller
                 DB::raw("
                 (SELECT
                     ingredient_variants.ingredient_types_id,
-                    SUM(current_qty * units.value) AS total_current_qty
+                    SUM(current_qty) AS total_current_qty
                 FROM
                     ingredient_variants
-                LEFT JOIN
-                    units ON units.id = ingredient_variants.unit_id
                 WHERE
-                    user_id=$userId
+                    user_id = $userId
                 GROUP BY
                     ingredient_types_id
                 ) AS iv"),
@@ -63,6 +61,7 @@ class FavoriteController extends Controller
             ->groupBy('recipes.id', 'recipes.recipe_name', 'recipes.description', 'recipe_img', 'favorite_recipes.id', 'recipes.cook_time')
             ->orderBy('missing_quantity', 'asc')
             ->orderBy('recipes.recipe_name', 'asc')
+            ->where('recipes.status', 1)
             ->where('favorite_recipes.user_id', '=', auth()->user()->id);
 
         if ($search != "all") {

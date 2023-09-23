@@ -59,33 +59,33 @@
 
 <div class="modal hide fade" tabindex="-1" id="modalRateExperience">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Rate Experience</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            <div class="form-group mb-2">
-                <label for="rating">Rating</label>
-                <select class="form-control mt-1" id="rating" name="rating">
-                    <option value="">- Pilih Rating -</option>
-                    <option value="5">5 - Sangat Memuaskan</option>
-                    <option value="4">4 - Memuaskan</option>
-                    <option value="3">3 - Oke</option>
-                    <option value="2">2 - Buruk</option>
-                    <option value="2">1 - Sangat Buruk</option>
-                    <option value="0">0 - Gagal</option>
-                </select>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Rate Experience</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="form-group mb-2">
-                <label for="comment">Komentar</label>
-                <textarea class="form-control mt-1" id="comment" name="comment" placeholder="Masukkan komentar..."></textarea>
+            <div class="modal-body">
+                <div class="form-group mb-2">
+                    <label for="rating">Rating</label>
+                    <select class="form-control mt-1" id="rating" name="rating">
+                        <option value="">- Pilih Rating -</option>
+                        <option value="5">5 - Sangat Memuaskan</option>
+                        <option value="4">4 - Memuaskan</option>
+                        <option value="3">3 - Oke</option>
+                        <option value="2">2 - Buruk</option>
+                        <option value="2">1 - Sangat Buruk</option>
+                        <option value="0">0 - Gagal</option>
+                    </select>
+                </div>
+                <div class="form-group mb-2">
+                    <label for="comment">Komentar</label>
+                    <textarea class="form-control mt-1" id="comment" name="comment" placeholder="Masukkan komentar..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" id='submitRateExperience' class="btn btn-primary">Simpan</button>
             </div>
         </div>
-        <div class="modal-footer">
-            <button type="submit" id='submitRateExperience' class="btn btn-primary">Simpan</button>
-        </div>
-      </div>
     </div>
 </div>
 @endsection
@@ -215,7 +215,7 @@
             })
         }
 
-        function dateTimeToLocale(date){
+        function dateTimeToLocale(date) {
             // Input date string
             const inputDateString = date;
 
@@ -224,8 +224,8 @@
 
             // Define an array for month names
             const monthNames = [
-            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
             ];
 
             const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
@@ -246,7 +246,7 @@
 
         $(document).on("change", "#filter", () => goToPage(1));
 
-        $('#submitRateExperience').click(function (){
+        $('#submitRateExperience').click(function() {
             swal.showLoading()
 
             const data = {
@@ -259,7 +259,7 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
-            
+
             $.ajax({
                 type: "patch",
                 data: data,
@@ -268,7 +268,7 @@
                     if (xhr.status === 200) {
                         $("#modalRateExperience").modal("hide");
                         fetchData();
-                    
+
                         swal.close()
                         swal.fire('Success', response.success, 'success');
                     }
@@ -277,7 +277,7 @@
         })
     })
 
-    function clickedRating(history_id){
+    function clickedRating(history_id) {
         historyClicked = history_id
 
         $('#rating').val(historyDatas.find(x => x.pivot.id == history_id).pivot.rating)

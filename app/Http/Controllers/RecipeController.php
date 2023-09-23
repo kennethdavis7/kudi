@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\IngredientVariants;
 use App\Models\Recipe;
 use App\Models\RecipeIngredient;
+use App\Models\TagRecipe;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -69,10 +70,14 @@ class RecipeController extends Controller
 
         $recipes = $recipes->paginate(10);
 
+        $tags = TagRecipe::leftJoin('tag_categories', 'tag_categories.id', '=', 'tag_recipes.tag_category_id')
+            ->leftJoin('recipes', 'recipes.id', '=', 'tag_recipes.recipe_id')->get();
+
         return response()->json([
             'title' => "Recipe",
             'active' => "recipe",
             'recipes' => $recipes,
+            'tags' => $tags
         ], 200);
     }
 
