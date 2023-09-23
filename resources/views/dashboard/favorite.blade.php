@@ -33,6 +33,17 @@
         <div class="col-md-4 mb-0">
             <div class="d-flex" id="search" role="search">
                 <input class="form-control me-2 search" type="search" placeholder="Search" aria-label="Search">
+                <div class="dropdown">
+                    <a class="btn border text-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                        Filter Tags
+                    </a>
+
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                        <li><a class="dropdown-item" href="#">Action</a></li>
+                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -170,6 +181,8 @@
 
                         html += `
                             </div>
+                            <span class="badge bg-success mb-2">Halal</span>
+                            <span class="badge bg-danger mb-2">Pedas</span>
                             <div class="mb-2" style="color:grey;"><i class="bi bi-clock" style="margin-right:0.5rem;"></i>Perkiraan ${moment.duration(recipe.cook_time, 's').humanize()}</div>
                         `;
 

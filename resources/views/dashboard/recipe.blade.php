@@ -35,6 +35,17 @@
         <div class="col-md-4 mb-0">
             <div class="d-flex" role="search">
                 <input class="form-control me-2 search" id="search" type="search" placeholder="Search" aria-label="Search">
+                <div class="dropdown">
+                    <a class="btn border text-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                        Filter Tags
+                    </a>
+
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                        <li><a class="dropdown-item" href="#">Action</a></li>
+                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -158,6 +169,7 @@
                                         <div>
                                             <div class="d-flex justify-content-between">
                                                 <h5 class="card-title mr-4">${recipe.recipe_name}</h5>
+                                                
                         `;
 
                         if (recipe.is_favourited > 0) {
@@ -172,10 +184,16 @@
 
                         html += `
                                     </div>
+<<<<<<< HEAD
                                 <div class="mb-2 text-muted d-flex align-items-center gap-2">
                                     <i class="bi bi-clock"></i>
                                     <span>${convertDuration(recipe.cook_time)}</span>
                                 </div>
+=======
+                                <span class="badge bg-success mb-2">Halal</span>
+                                <span class="badge bg-danger mb-2">Pedas</span>
+                                <div class="mb-2" style="color:grey;"><i class="bi bi-clock" style="margin-right:0.5rem;"></i>Perkiraan ${moment.duration(recipe.cook_time, 's').humanize()}</div>
+>>>>>>> 98fdc13 (add filter tag)
                     `;
 
                         console.log(recipe.recipe_name, recipe.missing_quantity);
