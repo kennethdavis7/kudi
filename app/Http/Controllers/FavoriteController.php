@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\FavoriteRecipes;
 use App\Models\Recipe;
+use App\Models\TagRecipe;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Models\RecipeIngredient;
@@ -24,6 +25,8 @@ class FavoriteController extends Controller
 
     public function fetchData($search)
     {
+        $search = json_decode($search);
+
         $userId = auth()->user()->id;
         $recipes = RecipeIngredient::select(
             'recipes.id',
@@ -58,22 +61,34 @@ class FavoriteController extends Controller
                 $join->on('favorite_recipes.recipe_id', '=', 'recipes.id');
                 $join->on('favorite_recipes.user_id', '=', DB::raw("'$userId'"));
             })
+            ->leftJoin('tag_recipes', 'tag_recipes.recipe_id', '=', 'recipes.id')
+            ->leftJoin('tag_categories', 'tag_categories.id', '=', 'tag_recipes.tag_category_id')
             ->groupBy('recipes.id', 'recipes.recipe_name', 'recipes.description', 'recipe_img', 'favorite_recipes.id', 'recipes.cook_time')
             ->orderBy('missing_quantity', 'asc')
             ->orderBy('recipes.recipe_name', 'asc')
             ->where('recipes.status', 1)
             ->where('favorite_recipes.user_id', '=', auth()->user()->id);
 
-        if ($search != "all") {
-            $recipes = $recipes->where("recipe_name", "LIKE", "%" . $search . "%");
+        if ($search->search != "all") {
+            $recipes = $recipes->where("recipe_name", "LIKE", "%" . $search->search . "%");
         }
 
-        $recipes = $recipes->paginate(6);
+        if (!empty($search->tags)) {
+            foreach ($search->tags as $tags) {
+                $recipes = $recipes->where('tag_recipes.tag_category_id', '=', $tags);
+            }
+        }
+
+        $recipes = $recipes->paginate(10);
+
+        $tags = TagRecipe::leftJoin('tag_categories', 'tag_categories.id', '=', 'tag_recipes.tag_category_id')
+            ->leftJoin('recipes', 'recipes.id', '=', 'tag_recipes.recipe_id')->get();
 
         return response()->json([
             'title' => "Favorites",
             'active' => "favorite",
             'recipes' => $recipes,
+            'tags' => $tags
         ], 200);
     }
     /**

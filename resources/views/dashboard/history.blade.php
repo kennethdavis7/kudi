@@ -172,6 +172,8 @@
 
                     historyDatas = response.recipes.data
 
+                    console.log(historyDatas)
+
                     $.each(response.recipes.data, function(i, recipe) {
                         html += `
                             <div class="card h-100 d-flex flex-column justify-content-between">
@@ -181,7 +183,7 @@
                                         <div>
                                             <div class="justify-content-between">
                                                 <h5 class="card-title mr-4">${recipe.recipe_name}</h5>
-                                                <p class="card-subtitle">Dibuat ` + dateTimeToLocale(recipe.created_at) + `</p>
+                                                <p class="card-subtitle" style="font-size:15px;">Dibuat ` + dateTimeToLocale(recipe.pivot.created_at) + `</p>
                         `;
 
                         html += `

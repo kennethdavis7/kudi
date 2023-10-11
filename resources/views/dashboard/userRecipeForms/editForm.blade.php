@@ -48,6 +48,11 @@
                         </div>
                     </div>
                 </div>
+                <div class="mb-3 w-100">
+                    <label for="tags" style="margin-bottom:10px;">Tag</label>
+                    <select class="multiple-tags w-100" name="tags[]" multiple="multiple">
+                    </select>
+                </div>
 
                 <div class="d-flex justify-content-between mt-3 mb-5">
                     <div class="col-md-6">
@@ -75,6 +80,7 @@
     const editSteps = <?php echo json_encode($steps); ?>;
     const editIngredients = <?php echo json_encode($ingredients); ?>;
     const editRecipe = <?php echo json_encode($recipes); ?>;
+    const editTags = <?php echo json_encode($tags); ?>;
 
     console.log(editSteps, editIngredients);
 
@@ -185,6 +191,36 @@
     })
 
     /**
+     * -- Tags
+     */
+    $(document).ready(function() {
+
+        function fetchTags() {
+            $.ajax({
+                type: "GET",
+                url: '/recipes/getTags',
+                success: function(response) {
+                    console.log(response)
+                    $.each(response.tags, function(i, item) {
+                        $(".multiple-tags").append(`
+                            <option class="optionTag" value="${item.id}">${item.tag}</option>
+                        `)
+                    })
+                    const selectedValues = editTags.map(tag => tag.tag_category_id);
+
+                    $('.multiple-tags').val(selectedValues).trigger('change');
+                }
+            })
+        }
+
+
+
+        fetchTags();
+        $('.multiple-tags').select2();
+        $(`.optionTag`).val(1).attr('selected', 'selected');
+    })
+
+    /**
      * -- Recipe details.
      */
     $(document).ready(function() {
@@ -234,7 +270,6 @@
                         >
                     </div>
                 `;
-
 
                 $("#recipeSteps").append(inputStep);
             }

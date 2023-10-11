@@ -30,20 +30,13 @@
             <div class="text-light px-3 py-2"><span id="percentage-budget"></span>% of budget used up</div>
         </div>
         <hr class="mb-5">
-        <div class="col-md-4 mb-0">
-            <div class="d-flex" id="search" role="search">
-                <input class="form-control me-2 search" type="search" placeholder="Search" aria-label="Search">
-                <div class="dropdown">
-                    <a class="btn border text-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                        Filter Tags
-                    </a>
-
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                        <li><a class="dropdown-item" href="#">Action</a></li>
-                        <li><a class="dropdown-item" href="#">Another action</a></li>
-                        <li><a class="dropdown-item" href="#">Something else here</a></li>
-                    </ul>
-                </div>
+        <div class="col-md-12 mb-0 d-flex align-items-center justify-content-between">
+            <div class="w-25" role="search">
+                <input class="form-control me-2 search" id="search" type="search" placeholder="Search" aria-label="Search">
+            </div>
+            <div class="dropdown" style="width: 15rem;">
+                <select class="multiple-tags w-100" style="height:50px;" name="tags[]" multiple="multiple">
+                </select>
             </div>
         </div>
     </div>
@@ -143,7 +136,14 @@
 
         function fetchData() {
             const rawSearchQuery = $('.search').val();
-            const search = rawSearchQuery.trim().length === 0 ? 'all' : rawSearchQuery;
+            const cleanSearch = rawSearchQuery.trim().length === 0 ? 'all' : rawSearchQuery;
+
+            const tag = $(".multiple-tags").val();
+
+            const search = JSON.stringify({
+                search: cleanSearch,
+                tags: tag
+            })
 
             $.ajax({
                 type: "GET",
@@ -181,7 +181,21 @@
 
                         html += `
                             </div>
-                            <div class="mb-2" style="color:grey;"><i class="bi bi-clock" style="margin-right:0.5rem;"></i>Perkiraan ${moment.duration(recipe.cook_time, 's').humanize()}</div>
+                        `;
+
+                        for (const tag of response.tags) {
+                            if (tag.recipe_name === recipe.recipe_name) {
+                                html += `
+                                <span class="badge text-bg-${tag.color}">${tag.tag}</span>
+                                `;
+                            }
+                        }
+
+                        html += `
+                            <div class="my-2 text-muted d-flex align-items-center gap-2">
+                                <i class="bi bi-clock"></i>
+                                <span>${convertDuration(recipe.cook_time)}</span>
+                            </div>
                         `;
 
                         if (recipe.missing_quantity > 0) {
@@ -216,6 +230,34 @@
 
             })
         }
+
+        fetchTags()
+
+        function fetchTags() {
+            $.ajax({
+                type: "GET",
+                url: '/recipes/getTags',
+                success: function(response) {
+                    console.log(response)
+                    $.each(response.tags, function(i, item) {
+                        $(".multiple-tags").append(`
+                    <option value="${item.id}">${item.tag}</option>
+                `)
+                    })
+                }
+            })
+        }
+
+        $(document).ready(function() {
+            $('.multiple-tags').select2({
+                placeholder: "Select tags",
+                allowClear: true,
+            });
+
+            $(document).on('change', '.multiple-tags', function(e) {
+                goToPage(1)
+            })
+        });
 
         $(document).on("click", ".favorite", function() {
             const recipeId = $(this).data("recipe-id");

@@ -32,17 +32,13 @@
             <div class="rounded bg-budget text-light px-3 py-2"><span id="percentage-budget"></span>% of budget used up</div>
         </div>
         <hr class="mb-5">
-        <div class="col-md-4 mb-0">
-            <div class="d-flex" role="search">
+        <div class="col-md-12 mb-0 d-flex align-items-center justify-content-between">
+            <div class="w-25" role="search">
                 <input class="form-control me-2 search" id="search" type="search" placeholder="Search" aria-label="Search">
-                <div class="dropdown">
-                    <a class="btn border text-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                        Filter Tags
-                    </a>
-
-                    <ul class="dropdown-menu" id="filter-tags" aria-labelledby="dropdownMenuLink">
-                    </ul>
-                </div>
+            </div>
+            <div class="dropdown" style=" width: 15rem;">
+                <select class="multiple-tags w-100" style="height:50px;" name="tags[]" multiple="multiple">
+                </select>
             </div>
         </div>
     </div>
@@ -145,22 +141,24 @@
 
         function fetchData() {
             const rawSearchQuery = $('.search').val();
-            const search = rawSearchQuery.trim().length === 0 ? 'all' : rawSearchQuery;
-            console.log("tes")
+            const cleanSearch = rawSearchQuery.trim().length === 0 ? 'all' : rawSearchQuery;
 
-            console.log($('#input-tag-1').val());
+            const tag = $(".multiple-tags").val();
 
-            for (const inputTag of $('.input-tag')) {
-                console.log(inputTag)
-            }
+            const search = JSON.stringify({
+                search: cleanSearch,
+                tags: tag
+            })
+
 
             $.ajax({
                 type: "GET",
-                url: `/recipes/fetchData/${search}/?page=${currentPage}&tag`,
+                url: `/recipes/fetchData/${search}/?page=${currentPage}`,
                 dataType: "json",
                 success: function(response) {
-                    let html = '';
                     $("#recipes").html("");
+
+                    let html = '';
                     if (response.recipes.data.length === 0) {
                         $("#recipes").append("<h3 class='empty-data text-center'>Not Found</h3>");
                         $("#recipes").addClass("d-flex justify-content-center");
@@ -201,12 +199,9 @@
                         for (const tag of response.tags) {
                             if (tag.recipe_name === recipe.recipe_name) {
                                 html += `
-                                    <span class="badge text-bg-${tag.color}">${tag.tag}</span>
+                                <span class="badge text-bg-${tag.color}">${tag.tag}</span>
                                 `;
                             }
-                            $("#filter-tags").append(`
-                                <li><a class="dropdown-item" href="#"><input type="checkbox" class="input-tag" id="input-tag-${tag.id}" value="${tag.id}" style="margin-right: 10px;" />${tag.tag}</a></li>
-                            `);
                         }
 
                         html += `
@@ -246,9 +241,39 @@
             })
         }
 
+        fetchTags()
+
+        function fetchTags() {
+            $.ajax({
+                type: "GET",
+                url: '/recipes/getTags',
+                success: function(response) {
+                    console.log(response)
+                    $.each(response.tags, function(i, item) {
+                        $(".multiple-tags").append(`
+                            <option value="${item.id}">${item.tag}</option>
+                        `)
+                    })
+                }
+            })
+        }
+
+        $(document).ready(function() {
+            $('.multiple-tags').select2({
+                placeholder: "Select tags",
+                allowClear: true,
+            });
+
+            $(document).on('change', '.multiple-tags', function(e) {
+                goToPage(1)
+            })
+        });
+
         $(document).on("input", ".search", () => goToPage(1));
 
-        $(document).on("click", ".input-tag", () => goToPage(1));
+        $(document).on("input", ".dropdown .dropdown-menu .input-tag", () => {
+            goToPage(1)
+        });
 
         $(document).on("click", ".favorite-black", function() {
             const recipeId = {

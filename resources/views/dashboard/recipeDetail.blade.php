@@ -37,6 +37,8 @@
                     </li>
                     @endforeach
                 </ul>
+
+
             </div>
         </div>
         <div class="overflow-scroll relative mb-4" style="max-width:100%;">
@@ -69,6 +71,10 @@
 
                         <button type="submit" class="btn btn-secondary mb-5 mt-3 decreaseIngredientsByRecipe" style="width: 100%;" id="submitUseIngredients">Gunakan bahan dalam penyimpanan</button>
                     </form>
+                </div>
+                @else
+                <div style="margin-bottom: 20rem;">
+                    <button type="submit" class="btn mb-5 mt-3" style="width: 100%;" id="submitUseIngredients"></button>
                 </div>
                 @endif
             </div>

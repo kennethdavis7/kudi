@@ -3,7 +3,7 @@
 
 @section("body")
 @include("layout.sidebar")
-<div class="container">
+<div class="container" style="margin:0; padding:0;">
     <form id="add-form">
         @csrf
 
@@ -46,6 +46,11 @@
                             <label class="text-secondary" for="">Second</label>
                         </div>
                     </div>
+                </div>
+                <div class="mb-3 w-100">
+                    <label for="tags" style="margin-bottom:10px;">Tag</label>
+                    <select class="multiple-tags w-100" name="tags[]" multiple="multiple">
+                    </select>
                 </div>
             </div>
 
@@ -315,6 +320,31 @@
             saveInputSteps();
         });
     });
+
+    /**
+     * -- Tags
+     */
+    $(document).ready(function() {
+
+        function fetchTags() {
+            $.ajax({
+                type: "GET",
+                url: '/recipes/getTags',
+                success: function(response) {
+                    console.log(response)
+                    $.each(response.tags, function(i, item) {
+                        $(".multiple-tags").append(`
+                            <option value="${item.id}">${item.tag}</option>
+                        `)
+                    })
+                }
+            })
+        }
+
+        fetchTags();
+        $('.multiple-tags').select2();
+    })
+
 
     /**
      * -- Ingredients.

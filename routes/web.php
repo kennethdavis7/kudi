@@ -41,6 +41,7 @@ Route::middleware(['auth'])->group(function () {
     Route::redirect('/', '/dashboard');
 
     Route::get('/logout', [LoginController::class, 'logout']);
+    Route::get('/templates/print/document/{recipe}', [PrintController::class, 'document']);
 
     Route::controller(IngredientController::class)->group(function () {
         Route::get('/ingredients/creation-times', 'fetchCreationTimes');
@@ -54,6 +55,7 @@ Route::middleware(['auth'])->group(function () {
     Route::controller(RecipeController::class)->group(function () {
         Route::get('/recipes/detail/{id}', 'detail');
         Route::get('/recipes/fetchData/{search}', 'fetchData');
+        Route::get('/recipes/getTags', 'getTags');
         Route::put('/recipes/decrease-ingredients-by-recipe/{id}', 'decreaseIngredientsByRecipe');
     });
 

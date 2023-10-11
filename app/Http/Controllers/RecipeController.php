@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\IngredientVariants;
 use App\Models\Recipe;
 use App\Models\RecipeIngredient;
+use App\Models\TagCategory;
+use App\Models\RecipeUserHistory;
 use App\Models\TagRecipe;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,6 +26,8 @@ class RecipeController extends Controller
 
     public function fetchData($search)
     {
+        $search = json_decode($search);
+
         $userId = auth()->user()->id;
 
         $recipes = RecipeIngredient::select(
@@ -59,13 +63,21 @@ class RecipeController extends Controller
                 $join->on('favorite_recipes.recipe_id', '=', 'recipes.id');
                 $join->on('favorite_recipes.user_id', '=', DB::raw("'$userId'"));
             })
+            ->leftJoin('tag_recipes', 'tag_recipes.recipe_id', '=', 'recipes.id')
+            ->leftJoin('tag_categories', 'tag_categories.id', '=', 'tag_recipes.tag_category_id')
             ->groupBy('recipes.id', 'recipes.recipe_name', 'recipes.description', 'recipe_img', 'favorite_recipes.id', 'recipes.cook_time')
             ->orderBy('missing_quantity', 'asc')
             ->orderBy('recipes.recipe_name', 'asc')
             ->where('recipes.status', 1);
 
-        if ($search != "all") {
-            $recipes = $recipes->where("recipe_name", "LIKE", "%" . $search . "%");
+        if ($search->search != "all") {
+            $recipes = $recipes->where("recipe_name", "LIKE", "%" . $search->search . "%");
+        }
+
+        if (!empty($search->tags)) {
+
+            $recipes = $recipes->whereIn('tag_recipes.tag_category_id', $search->tags);
+            $recipes = $recipes->having(DB::raw('COUNT(DISTINCT tag_recipes.tag_category_id)'), count($search->tags));
         }
 
         $recipes = $recipes->paginate(10);
@@ -125,11 +137,14 @@ class RecipeController extends Controller
             ->where('recipes.id', '=', $id)
             ->get();
 
+        $comments = RecipeUserHistory::leftJoin('users', 'users.id', '=', 'recipe_user_history.user_id')->where('recipe_id', $id)->get();
+
         return view('dashboard.recipeDetail', [
             'title' => "Detail",
             'active' => "recipe",
             'recipe' => $recipe,
             'ingredients' => $ingredients,
+            'comments' => $comments
         ]);
     }
 
@@ -175,6 +190,15 @@ class RecipeController extends Controller
             'title' => "Recipe",
             'active' => "recipe",
         ]);
+    }
+
+    public function getTags()
+    {
+        $tags = TagCategory::all();
+
+        return response()->json([
+            'tags' => $tags
+        ], 200);
     }
 
     /**

@@ -151,7 +151,7 @@
                         html += `
                         <tr>
                             <th scope="col" class="align-middle">${i + 1}</td>
-                            <td scope="col" class="align-middle"><img src="{{ asset('storage/' . '${recipe.recipe_img}') }}" width="200px" class="shadow-sm rounded"></td>
+                            <td scope="col" class="align-middle"><img src="{{ asset('storage/' . '${recipe.recipe_img}') }}" width="100px" class="shadow-sm rounded"></td>
                             <td scope="col" class="align-middle">${recipe.recipe_name}</td>`;
 
                         if (recipe.status !== 0) {

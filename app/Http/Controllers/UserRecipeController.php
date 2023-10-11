@@ -6,6 +6,8 @@ use App\Models\IngredientTypes;
 use Illuminate\Http\Request;
 use App\Models\Recipe;
 use App\Models\RecipeIngredient;
+use App\Models\TagRecipe;
+use App\Models\TagCategory;
 use App\Models\RecipeStep;
 use Illuminate\Support\Facades\DB;
 
@@ -54,6 +56,7 @@ class UserRecipeController extends Controller
      */
     public function store(Request $request)
     {
+
         $request->validate([
             "image" => "required|image|mimes:jpeg,png,jpg,gif,svg",
             "name" => "required",
@@ -64,6 +67,7 @@ class UserRecipeController extends Controller
             "ingredients.*.qty" => "required|numeric|integer|min:1",
             "steps" => "required|array|min:1",
             "steps.*" => "required",
+            "tags.*" => "required",
         ]);
 
         $imagePath = $request->image->store("public/images/recipes");
@@ -98,6 +102,13 @@ class UserRecipeController extends Controller
                     "order" => $index + 1,
                 ]);
             }
+
+            foreach ($request->tags as $index => $tag) {
+                TagRecipe::create([
+                    "tag_category_id" => (int) $tag,
+                    "recipe_id" => $recipe->id,
+                ]);
+            }
         });
 
         return response('', 204);
@@ -120,6 +131,7 @@ class UserRecipeController extends Controller
         $steps = RecipeStep::where('recipe_id', $id)->get();
         $ingredients = RecipeIngredient::where('recipe_id', $id)->get();
         $ingredientTypes = IngredientTypes::get();
+        $tags = TagRecipe::where('recipe_id', $id)->get();
 
         return view('dashboard.userRecipeForms.editForm', [
             'title' => 'Your Recipe',
@@ -127,7 +139,8 @@ class UserRecipeController extends Controller
             'recipes' => $recipes,
             'types' => $ingredientTypes,
             'steps' => $steps,
-            'ingredients' => $ingredients
+            'ingredients' => $ingredients,
+            'tags' => $tags
         ]);
     }
 
@@ -196,6 +209,15 @@ class UserRecipeController extends Controller
                     "order" => $index + 1,
                 ]);
             }
+
+            TagRecipe::where('recipe_id', $recipeId)->delete();
+
+            foreach ($request->tags as $index => $tag) {
+                TagRecipe::create([
+                    "tag_category_id" => (int) $tag,
+                    "recipe_id" => $recipe->id,
+                ]);
+            }
         });
 
 
@@ -230,6 +252,7 @@ class UserRecipeController extends Controller
      */
     public function destroy(string $id)
     {
+        TagRecipe::where('recipe_id', $id)->delete();
         Recipe::destroy($id);
         return response()->json([
             "message" => "Recipe has been deleted"

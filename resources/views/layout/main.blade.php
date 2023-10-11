@@ -95,7 +95,7 @@
 </head>
 
 <body>
-  <main class="d-flex flex-nowrap" style="overflow-y: auto; min-height: 100vh;">
+  <main class="d-flex flex-nowrap" style="overflow-y: auto; min-height: 60rem;">
     @yield("body")
   </main>
 
