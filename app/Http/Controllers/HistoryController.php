@@ -66,7 +66,7 @@ class HistoryController extends Controller
         $history->update();
 
         return response()->json([
-            'success' => 'Your experience has been saved!'
-        ], 200);
+            'message' => 'History has been updated',
+        ]);
     }
 }

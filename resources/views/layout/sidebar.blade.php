@@ -1,4 +1,4 @@
-<div class="d-flex flex-column flex-shrink-0 p-3 rounded" style="position: sticky; top: 0; bottom:100%; min-height:100vh; min-width:160px; max-width: 280px; box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;">
+<div class="d-flex flex-column flex-shrink-0 p-3 rounded" style="position: sticky; top: 0; bottom:100%; min-height:100vh; min-width:220px; max-width: 280px; box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;">
   <a href="/" class="d-flex align-items-center link-body-emphasis text-decoration-none my-4">
     <img src="{{ asset('img/kudi.png') }}" class="bi pe-none me-2" width="35"></img>
     <span class="fs-4">KuDi</span>

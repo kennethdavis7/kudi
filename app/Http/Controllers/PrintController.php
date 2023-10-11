@@ -16,10 +16,6 @@ class PrintController extends Controller
     public function index(Recipe $recipe)
     {
 
-        // $ingredients = Recipe::where('recipes.id', $recipe->id)->leftJoin('recipe_ingredients', 'recipe_ingredients.recipe_id', '=', 'recipes.id')
-        //     ->leftJoin('ingredient_variants', 'ingredient_variants.ingredient_types_id', '=', 'recipe_ingredients.ingredient_types_id',)
-        //     ->leftJoin('ingredient_types', 'ingredient_types.id', '=', 'ingredient_variants.ingredient_types_id')->get();
-
         $ingredients = RecipeIngredient::where('recipe_id', $recipe->id)
             ->leftJoin('ingredient_types', 'ingredient_types.id', '=', 'recipe_ingredients.ingredient_types_id')
             ->leftJoin('units', 'units.id', '=', 'recipe_ingredients.unit_id')
@@ -83,7 +79,6 @@ class PrintController extends Controller
                     <ul class='list-group list-group-flush'>
         ";
 
-        // Write some simple Content
         $document->WriteHTML($html);
 
         // Save PDF on your public storage 

@@ -16,8 +16,8 @@ class ProfileController extends Controller
     {
 
         return view('dashboard.profile', [
-            "title" => "Profile",
-            "active" => "",
+            'title' => 'Profile',
+            'active' => "",
         ]);
     }
 
