@@ -38,6 +38,27 @@
                     @endforeach
                 </ul>
 
+                <!-- <hr>
+                <h3>Comments</h3>
+                <ul class="list-group list-group-flush">
+                    @foreach($comments as $comment)
+                    @if($comment->comment !== null)
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="d-flex flex-column">
+                            <div class="d-flex align-items-center justify-content-center mb-4">
+                                <img src="{{asset('storage/' . $comment->image)}}" style="border-radius: 100%; margin-right: 10px;" width="30px"></img>
+                                <span class="text-secondary" style="font-size:15px;">{{$comment->name}}</span>
+                            </div>
+                            <span>{{$comment->comment}}</span>
+                        </div>
+                        <div>
+                            <span class="badge bg-primary rounded-pill">Edit</span>
+                            <span class="badge bg-danger rounded-pill">Delete</span>
+                        </div>
+                    </li>
+                    @endif
+                    @endforeach
+                </ul> -->
 
             </div>
         </div>

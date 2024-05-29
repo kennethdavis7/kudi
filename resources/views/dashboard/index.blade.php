@@ -13,17 +13,17 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title mb-4">Ingredient Stocks</h4>
-                    <h5 class="card-subtitle mb-2 text-secondary">{{$ingredientCount }} ingredients</h5>
+                    <h6 class="card-title mb-4">Ingredient Stocks</h6>
+                    <h6 class="card-subtitle mb-2 text-secondary">{{$ingredientCount }} ingredients</h6>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title mb-4">Longest Duration Kept</h4>
-                    <h5 class="card-subtitle mb-2 text-secondary" id="longest-duration-kept">
-                    </h5>
+                    <h6 class="card-title mb-4">Longest Duration Kept</h6>
+                    <h6 class="card-subtitle mb-2 text-secondary" id="longest-duration-kept">
+                    </h6>
                 </div>
             </div>
         </div>
@@ -31,11 +31,11 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
-                        <h4 class="card-title mb-4" style="display:flex;">Monthly Budget</h4>
+                        <h6 class="card-title mb-4" style="display:flex;">Monthly Budget</h6>
                         <i class="bi bi-pencil-square" data-bs-toggle="modal" data-bs-target="#budget-modal"></i>
                     </div>
-                    <h5 class="card-subtitle mb-2 text-secondary" id="budget">
-                    </h5>
+                    <h6 class="card-subtitle mb-2 text-secondary" id="budget">
+                    </h6>
                 </div>
             </div>
         </div>
