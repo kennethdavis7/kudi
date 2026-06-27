@@ -61,7 +61,7 @@ class IngredientController extends Controller
             ->get()
             ->groupBy('unit_category_id');
 
-        $ingredients->each(function($ingredient) use ($units) {
+        $ingredients->each(function ($ingredient) use ($units) {
             $ingredient->ingredientVariants->map(function ($variant) use ($ingredient, $units) {
                 $ingredientUnits = $units[$ingredient->unit_category_id];
                 $result = $this->getDisplayQty($variant, $ingredientUnits);
@@ -148,7 +148,7 @@ class IngredientController extends Controller
         $userId = auth()->user()->id;
         $data = $validator->validated();
 
-        DB::transaction(function() use ($userId, $data) {
+        DB::transaction(function () use ($userId, $data) {
             $ingredientTypeId = $data['ingredient'];
             $qty = $data['qty'];
             $price = $data['price'];
@@ -181,9 +181,7 @@ class IngredientController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(IngredientVariants $ingredientVariants)
-    {
-    }
+    public function show(IngredientVariants $ingredientVariants) {}
 
     /**
      * Show the form for editing the specified resource.
@@ -200,10 +198,10 @@ class IngredientController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, IngredientVariants $variant)
+    public function update(Request $request, $ingredient)
     {
         $validator = Validator::make($request->all(), [
-            'buy_price' => 'required',
+            'buy_price' => 'required|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -212,13 +210,15 @@ class IngredientController extends Controller
             ], 400);
         }
 
-        $data = $validator->validated();
-        $variant['buy_price'] = $data['buy_price'];
+        $variant = IngredientVariants::findOrFail($ingredient);
+
+        $variant->buy_price = $request->buy_price;
+        $variant->save();
 
         return response()->json([
             "success" => "Ingredient has been edited",
-            "data" => $data,
-            "id" => $request->ingredient_variants_id,
+            "data" => $variant,
+            "id" => $variant->id,
         ]);
     }
 
@@ -247,16 +247,24 @@ class IngredientController extends Controller
 
     private function getDisplayQty(IngredientVariants $variant, Collection $units)
     {
+        $units = $units->sortByDesc('value');
+
         foreach ($units as $unit) {
             $qty = $variant->current_qty / $unit->value;
-            $unit = $unit->abbreviation;
 
-            if ($qty <= 1000) break;
+            if ($qty >= 1) {
+                return [
+                    'qty' => $qty,
+                    'unit' => $unit->abbreviation,
+                ];
+            }
         }
 
+        $smallestUnit = $units->sortBy('value')->first();
+
         return [
-            'qty' => $qty,
-            'unit' => $unit,
+            'qty' => $variant->current_qty / $smallestUnit->value,
+            'unit' => $smallestUnit->abbreviation,
         ];
     }
 }
