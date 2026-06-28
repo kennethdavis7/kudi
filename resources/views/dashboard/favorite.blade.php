@@ -147,7 +147,7 @@
 
             $.ajax({
                 type: "GET",
-                url: `/favorites/fetchData/${search}/?page=${currentPage}`,
+                url: `/favorites/fetchData/${search}?page=${currentPage}`,
                 dataType: "json",
                 success: function(response) {
                     $("#recipes").html("");

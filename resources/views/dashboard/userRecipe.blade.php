@@ -129,7 +129,7 @@
 
             $.ajax({
                 type: "GET",
-                url: `/user-recipes/fetch-data/${search}/?page=${currentPage}`,
+                url: `/user-recipes/fetch-data/${search}?page=${currentPage}`,
                 success: function(response) {
                     $("#recipes-table").html("");
                     $(".empty-data").remove();

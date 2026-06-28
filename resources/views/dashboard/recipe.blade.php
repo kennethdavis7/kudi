@@ -153,7 +153,7 @@
 
             $.ajax({
                 type: "GET",
-                url: `/recipes/fetchData/${search}/?page=${currentPage}/`,
+                url: `/recipes/fetchData/${search}?page=${currentPage}/`,
                 dataType: "json",
                 success: function(response) {
                     $("#recipes").html("");

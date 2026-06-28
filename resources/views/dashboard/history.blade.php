@@ -163,7 +163,7 @@
 
             $.ajax({
                 type: "GET",
-                url: `/histories/fetchData/${filter}/?page=${currentPage}`,
+                url: `/histories/fetchData/${filter}?page=${currentPage}`,
                 dataType: "json",
                 success: function(response) {
                     totalPages = Math.ceil(response.recipes.total / response.recipes.per_page);
