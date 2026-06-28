@@ -277,7 +277,7 @@
 
             $.ajax({
                 type: "GET",
-                url: `/ingredients/fetchData/${search}/?page=${currentPage}`,
+                url: `/ingredients/fetchData/${search}?page=${currentPage}`,
                 dataType: "json",
                 success: function(response) {
                     totalPages = Math.ceil(response.ingredients.total / response.ingredients.per_page);
