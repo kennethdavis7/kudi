@@ -9,7 +9,7 @@
         <h1 class="text-center my-4">{{$recipe->recipe_name}}</h1>
         <hr>
         <div class="row content ">
-            <img src="{{asset('storage/' . $recipe->recipe_img)}}" style="width: 100%; height: 300px; object-fit: cover;" class="w-100" alt="">
+            <img src="{{ $recipe->recipe_img }}" style="width: 100%; height: 300px; object-fit: cover;" class="w-100" alt="">
             <div class="col-6 mt-4 left-column">
                 <h4>Description</h4>
                 <p class="mt-2 text-justify" style="font-size: 10px;">{{$recipe->description}}</p>

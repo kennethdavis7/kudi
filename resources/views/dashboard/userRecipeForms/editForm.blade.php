@@ -19,7 +19,7 @@
             </div>
             <div class="col-md-12">
                 <div class="mb-3">
-                    <img src="{{asset('storage/' . $recipes->recipe_img)}}" alt="..." width="200px" class="img-thumbnail d-block mb-4">
+                    <img src="{{ $recipes->recipe_img }}" alt="..." width="200px" class="img-thumbnail d-block mb-4">
                     <label for="formFile" class="form-label">Image</label>
                     <input class="form-control" type="file" id="formFile" name="image">
                 </div>

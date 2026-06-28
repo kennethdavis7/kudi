@@ -9,7 +9,7 @@
             <div>
                 <h1>{{ $recipe->recipe_name }}</h1>
                 <hr>
-                <img src="{{ asset('storage/' . $recipe->recipe_img) }}" style="width: 100%; height: 20rem; object-fit: cover;" class="w-100" alt="">
+                <img src="{{ $recipe->recipe_img }}" style="width: 100%; height: 20rem; object-fit: cover;" class="w-100" alt="">
             </div>
 
             <div style="max-height: 100%; margin-top: 1rem;">

@@ -23,7 +23,7 @@ class RegisterController extends Controller
             'password' => ['required', "min:8"],
         ]);
 
-        $validationData["image"] = "public/images/users/user-default.png";
+        $validationData["image"] = "https://res.cloudinary.com/dz1tjjfw0/image/upload/v1782652683/kudi/users/swgublypk2nassecdhqt.png";
 
         $validationData["password"] = Hash::make($validationData["password"]);
 

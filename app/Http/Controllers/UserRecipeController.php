@@ -10,6 +10,7 @@ use App\Models\TagRecipe;
 use App\Models\TagCategory;
 use App\Models\RecipeStep;
 use Illuminate\Support\Facades\DB;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class UserRecipeController extends Controller
 {
@@ -70,7 +71,9 @@ class UserRecipeController extends Controller
             "tags.*" => "required",
         ]);
 
-        $imagePath = $request->image->store("public/images/recipes");
+        $imagePath = Cloudinary::upload($request->file('image')->getRealPath(), [
+            'folder' => 'kudi/recipes'
+        ])->getSecurePath();
 
         $cookTime = ($request->hour * 3600) + ($request->minute * 60) + $request->second;
 
@@ -163,10 +166,12 @@ class UserRecipeController extends Controller
 
         $recipeObj = Recipe::find($recipeId);
 
-        if ($request->image === null) {
+        if (!$request->hasFile('image')) {
             $imagePath = $recipeObj->recipe_img;
         } else {
-            $imagePath = $request->image->store("public/images/recipes");
+            $imagePath = Cloudinary::upload($request->file('image')->getRealPath(), [
+                'folder' => 'kudi/recipes'
+            ])->getSecurePath();
         }
 
         $userId = auth()->user()->id;

@@ -19,7 +19,7 @@
             @csrf
             @method("PUT")
             <div class="mb-3">
-                <img src="{{asset('storage/' . auth()->user()->image)}}" alt="..." width="200px" class="img-thumbnail d-block mb-4">
+                <img src="{{ auth()->user()->image }}" alt="..." width="200px" class="img-thumbnail d-block mb-4">
                 <label for="formFile" class="form-label">Profile photo</label>
                 <input class="form-control {{$errors->has('image') ? 'is-invalid' : ''}}" type="file" name="image" id="formFile">
                 @error('image')

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 
 class ProfileController extends Controller
@@ -48,9 +49,7 @@ class ProfileController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
-    {
-    }
+    public function edit(string $id) {}
 
     /**
      * Update the specified resource in storage.
@@ -67,7 +66,9 @@ class ProfileController extends Controller
                 'image' => 'image|mimes:jpeg,png,jpg,gif,svg'
             ]);
 
-            $validationData["image"] = $request->image->store("public/images/users");
+            $validationData["image"] = Cloudinary::upload($request->file('image')->getRealPath(), [
+                'folder' => 'kudi/users'
+            ])->getSecurePath();
         }
 
         if ($request->password !== null) {
