@@ -40,8 +40,9 @@ class DashboardController extends Controller
         $ingredientCount = User::find($userId)->ingredientTypes()->count();
 
         if ($ingredientCount > 0) {
-            $longestDurationKept = IngredientVariants::where('user_id', $userId)->where("current_qty", ">", 0)
-                ->min(DB::raw('TIMESTAMPDIFF(SECOND, NOW(), ingredient_variants.created_at)'));
+            $longestDurationKept = IngredientVariants::where('user_id', $userId)
+                ->where('current_qty', '>', 0)
+                ->max(DB::raw('TIMESTAMPDIFF(SECOND, ingredient_variants.created_at, NOW())'));
         } else {
             $longestDurationKept = -1;
         }
