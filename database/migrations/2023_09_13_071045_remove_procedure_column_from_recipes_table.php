@@ -9,11 +9,14 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
+
     public function up(): void
     {
-        Schema::table('recipes', function (Blueprint $table) {
-            $table->dropColumn('procedure');
-        });
+        if (Schema::hasColumn('recipes', 'procedure')) {
+            Schema::table('recipes', function (Blueprint $table) {
+                $table->dropColumn('procedure');
+            });
+        }
     }
 
     /**
@@ -21,8 +24,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('recipes', function (Blueprint $table) {
-            $table->string('procedure');
-        });
+        if (!Schema::hasColumn('recipes', 'procedure')) {
+            Schema::table('recipes', function (Blueprint $table) {
+                $table->text('procedure');
+            });
+        }
     }
 };
