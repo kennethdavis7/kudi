@@ -11,6 +11,8 @@ WORKDIR /var/www/html
 
 COPY . .
 
+RUN rm -f public/hot
+
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 RUN npm ci
