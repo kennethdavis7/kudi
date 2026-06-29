@@ -39,13 +39,11 @@ class DashboardController extends Controller
 
         $ingredientCount = User::find($userId)->ingredientTypes()->count();
 
-        if ($ingredientCount > 0) {
-            $longestDurationKept = IngredientVariants::where('user_id', $userId)
-                ->where('current_qty', '>', 0)
-                ->max(DB::raw('TIMESTAMPDIFF(SECOND, ingredient_variants.created_at, NOW())'));
-        } else {
-            $longestDurationKept = -1;
-        }
+        $longestDurationKept = IngredientVariants::where('user_id', $userId)
+            ->where('current_qty', '>', 0)
+            ->selectRaw('ABS(TIMESTAMPDIFF(SECOND, created_at, NOW())) as duration')
+            ->orderByDesc('duration')
+            ->value('duration') ?? -1;
 
         return view("dashboard.index", [
             'title' => 'Dashboard',
