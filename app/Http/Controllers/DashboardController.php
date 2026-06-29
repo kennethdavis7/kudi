@@ -37,7 +37,12 @@ class DashboardController extends Controller
             ->pluck('expense');
 
 
-        $ingredientCount = User::find($userId)->ingredientTypes()->where('current_qty', '>', 0)->count();
+        $ingredientCount = IngredientTypes::select('ingredient_types.id')
+            ->join('ingredient_variants', 'ingredient_types.id', '=', 'ingredient_variants.ingredient_types_id')
+            ->where('ingredient_variants.user_id', $userId)
+            ->groupBy('ingredient_types.id')
+            ->havingRaw('SUM(ingredient_variants.current_qty) > 0')
+            ->count();
 
         $oldest = IngredientVariants::where('user_id', $userId)
             ->where('current_qty', '>', 0)
