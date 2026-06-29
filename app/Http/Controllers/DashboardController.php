@@ -37,7 +37,7 @@ class DashboardController extends Controller
             ->pluck('expense');
 
 
-        $ingredientCount = User::find($userId)->ingredientTypes()->count();
+        $ingredientCount = User::find($userId)->ingredientTypes()->where('current_qty', '>', 0)->count();
 
         $oldest = IngredientVariants::where('user_id', $userId)
             ->where('current_qty', '>', 0)
