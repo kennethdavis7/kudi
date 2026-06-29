@@ -24,19 +24,19 @@ class HistoryController extends Controller
         $recipes = User::find($userId)->recipeHistories()->when($filter != 'all', function ($recipe) use ($filter) {
             switch ($filter) {
                 case 'day': {
-                        return $recipe->where('recipe_user_history.created_at', '>=', Carbon::now()->tz('Asia/Jakarta')->subDay());
+                        return $recipe->where('recipe_user_history.created_at', '>=', Carbon::now()->tz('Australia/Sydney')->subDay());
                     }
                 case 'days': {
-                        return $recipe->where('recipe_user_history.created_at', '>=', Carbon::now()->tz('Asia/Jakarta')->subDays(3));
+                        return $recipe->where('recipe_user_history.created_at', '>=', Carbon::now()->tz('Australia/Sydney')->subDays(3));
                     }
                 case 'week': {
-                        return $recipe->where('recipe_user_history.created_at', '>=', Carbon::now()->tz('Asia/Jakarta')->subWeek());
+                        return $recipe->where('recipe_user_history.created_at', '>=', Carbon::now()->tz('Australia/Sydney')->subWeek());
                     }
                 case 'month': {
-                        return $recipe->where('recipe_user_history.created_at', '>=', Carbon::now()->tz('Asia/Jakarta')->subMonth());
+                        return $recipe->where('recipe_user_history.created_at', '>=', Carbon::now()->tz('Australia/Sydney')->subMonth());
                     }
                 case 'year': {
-                        return $recipe->where('recipe_user_history.created_at', '>=', Carbon::now()->tz('Asia/Jakarta')->subyear());
+                        return $recipe->where('recipe_user_history.created_at', '>=', Carbon::now()->tz('Australia/Sydney')->subyear());
                     }
                 default: {
                         return true;
