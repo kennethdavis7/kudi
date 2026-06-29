@@ -4,8 +4,6 @@ KuDi is a web-based kitchen inventory and recipe management system that helps us
 
 ## Note
 - The user interface is not fully responsive.
-  
----
 
 ## Features
 
@@ -17,8 +15,6 @@ KuDi is a web-based kitchen inventory and recipe management system that helps us
 - Monthly budget tracking
 - Dashboard with statistics
 - Cloudinary image upload and storage
-
----
 
 ## Tech Stack
 
