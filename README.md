@@ -2,6 +2,9 @@
 
 KuDi is a web-based kitchen inventory and recipe management system that helps users manage ingredients, recipes, cooking history, and monthly food budgets. This project was made for a national business innovation competition (Festival Inovasi dan Kewirausahaan Siswa) in the Digital Technology Category. 
 
+## Live Demo
+Website: https://kudi-production.up.railway.app
+
 ## Note
 - The user interface is not fully responsive.
 
