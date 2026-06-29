@@ -37,7 +37,7 @@ Website: https://kudi-production.up.railway.app
 - Chart.js
 - Moment.js
 
-### Cloud Services
+### Services
 
 - Cloudinary (Image Storage)
 - Railway (Deployment)
