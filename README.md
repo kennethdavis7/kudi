@@ -9,6 +9,7 @@ Website: https://kudi-production.up.railway.app
 ## Note
 
 - The user interface is not fully responsive.
+- Currently, this website is in Indonesian. Please use Google Translate or your browser's built-in translation feature to translate the content into English.
 
 ## Features
 
